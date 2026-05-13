@@ -11,6 +11,10 @@
   <Folder Name="/Soft/App/">
     <Project Path="Soft/App/App.csproj" />
   </Folder>
+  <Folder Name="/Soft/ConsApp/">
+    <Project Path="Soft/ConsApp/ConsApp.Client/ConsApp.Client.csproj" Id="4eae6204-ef51-4b49-958b-c7df78f18f0f" />
+    <Project Path="Soft/ConsApp/ConsApp/ConsApp.csproj" Id="f95a57dd-d665-4b56-9377-e5a9da6b284e" />
+  </Folder>
   <Folder Name="/Soft/Movie/">
     <Project Path="Soft/Movie/Client/Movie.Client.csproj" />
     <Project Path="Soft/Movie/Server/Movie.csproj" />
