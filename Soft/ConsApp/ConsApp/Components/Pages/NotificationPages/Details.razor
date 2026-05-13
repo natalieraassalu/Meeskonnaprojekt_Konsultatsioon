@@ -1,4 +1,6 @@
-﻿@page "/notifications/details"
+@page "/notifications/details"
+@* Stay on the server, don't move to the browser *@
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
