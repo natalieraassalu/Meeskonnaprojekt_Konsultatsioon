@@ -1,0 +1,39 @@
+﻿@page "/courseconsultations"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Abc.Data.Consultation
+@using ConsApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="courseconsultations/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.CourseConsultation">
+    <PropertyColumn Property="courseconsultation => courseconsultation.CourseId" />
+    <PropertyColumn Property="courseconsultation => courseconsultation.ConsultationSlotId" />
+    <PropertyColumn Property="courseconsultation => courseconsultation.ValidFrom" />
+    <PropertyColumn Property="courseconsultation => courseconsultation.ValidTo" />
+
+    <TemplateColumn Context="courseconsultation">
+        <a href="@($"courseconsultations/edit?id={courseconsultation.Id}")">Edit</a> |
+        <a href="@($"courseconsultations/details?id={courseconsultation.Id}")">Details</a> |
+        <a href="@($"courseconsultations/delete?id={courseconsultation.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

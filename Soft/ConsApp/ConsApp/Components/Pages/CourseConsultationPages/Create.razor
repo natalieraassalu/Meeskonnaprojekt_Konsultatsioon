@@ -1,0 +1,61 @@
+@page "/courseconsultations/create"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>CourseConsultation</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="CourseConsultation" OnValidSubmit="AddCourseConsultation" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="courseid" class="form-label">CourseId:</label> 
+                <input id="courseid" @bind="CourseConsultation.CourseId" class="form-control" type="text" /> 
+                <ValidationMessage For="() => CourseConsultation.CourseId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="consultationslotid" class="form-label">ConsultationSlotId:</label> 
+                <input id="consultationslotid" @bind="CourseConsultation.ConsultationSlotId" class="form-control" type="text" /> 
+                <ValidationMessage For="() => CourseConsultation.ConsultationSlotId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="validfrom" class="form-label">ValidFrom:</label> 
+                <InputDate id="validfrom" @bind-Value="CourseConsultation.ValidFrom" class="form-control" /> 
+                <ValidationMessage For="() => CourseConsultation.ValidFrom" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="validto" class="form-label">ValidTo:</label> 
+                <InputDate id="validto" @bind-Value="CourseConsultation.ValidTo" class="form-control" /> 
+                <ValidationMessage For="() => CourseConsultation.ValidTo" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/courseconsultations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private CourseConsultation CourseConsultation { get; set; } = default!;
+
+    protected override void OnInitialized() => CourseConsultation ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddCourseConsultation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.CourseConsultation.Add(CourseConsultation);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/courseconsultations");
+    }
+}

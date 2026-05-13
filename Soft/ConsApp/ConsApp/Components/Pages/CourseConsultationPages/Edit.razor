@@ -1,0 +1,104 @@
+@page "/courseconsultations/edit"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>CourseConsultation</h2>
+<hr />
+@if (CourseConsultation is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="CourseConsultation" OnValidSubmit="UpdateCourseConsultation" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="CourseConsultation.Id" value="@CourseConsultation.Id" />
+                <div class="mb-3">
+                    <label for="courseid" class="form-label">CourseId:</label>
+                    <input id="courseid" @bind="CourseConsultation.CourseId" class="form-control" type="text" />
+                    <ValidationMessage For="() => CourseConsultation.CourseId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="consultationslotid" class="form-label">ConsultationSlotId:</label>
+                    <input id="consultationslotid" @bind="CourseConsultation.ConsultationSlotId" class="form-control" type="text" />
+                    <ValidationMessage For="() => CourseConsultation.ConsultationSlotId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="validfrom" class="form-label">ValidFrom:</label>
+                    <InputDate id="validfrom" @bind-Value="CourseConsultation.ValidFrom" class="form-control" />
+                    <ValidationMessage For="() => CourseConsultation.ValidFrom" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="validto" class="form-label">ValidTo:</label>
+                    <InputDate id="validto" @bind-Value="CourseConsultation.ValidTo" class="form-control" />
+                    <ValidationMessage For="() => CourseConsultation.ValidTo" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/courseconsultations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private CourseConsultation? CourseConsultation { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        CourseConsultation ??= await context.CourseConsultation.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (CourseConsultation is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateCourseConsultation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(CourseConsultation!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!CourseConsultationExists(CourseConsultation!.Id))
+            {
+                NavigationManager.NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/courseconsultations");
+    }
+
+    private bool CourseConsultationExists(Guid id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.CourseConsultation.Any(e => e.Id == id);
+    }
+}

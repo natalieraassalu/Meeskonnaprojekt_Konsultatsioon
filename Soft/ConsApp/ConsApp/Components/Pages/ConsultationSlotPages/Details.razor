@@ -1,0 +1,60 @@
+﻿@page "/consultationslots/details"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>ConsultationSlot</h2>
+    <hr />
+    @if (consultationslot is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CourseId</dt>
+            <dd class="col-sm-10">@consultationslot.CourseId</dd>
+            <dt class="col-sm-2">LecturerId</dt>
+            <dd class="col-sm-10">@consultationslot.LecturerId</dd>
+            <dt class="col-sm-2">StartTime</dt>
+            <dd class="col-sm-10">@consultationslot.StartTime</dd>
+            <dt class="col-sm-2">EndTime</dt>
+            <dd class="col-sm-10">@consultationslot.EndTime</dd>
+            <dt class="col-sm-2">MeetingLink</dt>
+            <dd class="col-sm-10">@consultationslot.MeetingLink</dd>
+            <dt class="col-sm-2">IsBooked</dt>
+            <dd class="col-sm-10">@consultationslot.IsBooked</dd>
+            <dt class="col-sm-2">ValidFrom</dt>
+            <dd class="col-sm-10">@consultationslot.ValidFrom</dd>
+            <dt class="col-sm-2">ValidTo</dt>
+            <dd class="col-sm-10">@consultationslot.ValidTo</dd>
+        </dl>
+        <div>
+            <a href="@($"/consultationslots/edit?id={consultationslot.Id}")">Edit</a> |
+            <a href="@($"/consultationslots")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private ConsultationSlot? consultationslot;
+
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        consultationslot = await context.ConsultationSlot.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (consultationslot is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+}

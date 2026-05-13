@@ -24,7 +24,7 @@ else
                 <input type="hidden" name="Feedback.Id" value="@Feedback.Id" />
                 <div class="mb-3">
                     <label for="bookingid" class="form-label">BookingId:</label>
-                    <InputText id="bookingid" @bind-Value="Feedback.BookingId" class="form-control" />
+                    <input id="bookingid" type="text" @bind="Feedback.BookingId" class="form-control" />
                     <ValidationMessage For="() => Feedback.BookingId" class="text-danger" />
                 </div>
                 <div class="mb-3">

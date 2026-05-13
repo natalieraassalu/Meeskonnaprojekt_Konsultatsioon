@@ -1,0 +1,83 @@
+﻿@page "/consultationslots/delete"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>ConsultationSlot</h2>
+    <hr />
+    @if (consultationslot is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CourseId</dt>
+            <dd class="col-sm-10">@consultationslot.CourseId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">LecturerId</dt>
+            <dd class="col-sm-10">@consultationslot.LecturerId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">StartTime</dt>
+            <dd class="col-sm-10">@consultationslot.StartTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">EndTime</dt>
+            <dd class="col-sm-10">@consultationslot.EndTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">MeetingLink</dt>
+            <dd class="col-sm-10">@consultationslot.MeetingLink</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">IsBooked</dt>
+            <dd class="col-sm-10">@consultationslot.IsBooked</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">ValidFrom</dt>
+            <dd class="col-sm-10">@consultationslot.ValidFrom</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">ValidTo</dt>
+            <dd class="col-sm-10">@consultationslot.ValidTo</dd>
+        </dl>
+        <EditForm method="post" Model="consultationslot" OnValidSubmit="DeleteConsultationSlot" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(consultationslot is null)">Delete</button> |
+            <a href="/consultationslots">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private ConsultationSlot? consultationslot;
+
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        consultationslot = await context.ConsultationSlot.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (consultationslot is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+
+    private async Task DeleteConsultationSlot()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.ConsultationSlot.Remove(consultationslot!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/consultationslots");
+    }
+}

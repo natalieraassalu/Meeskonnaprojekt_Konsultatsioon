@@ -1,0 +1,42 @@
+﻿@page "/bookingpages"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Abc.Data.Consultation
+@using ConsApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="bookingpages/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.BookingPage">
+    <PropertyColumn Property="bookingpage => bookingpage.SlotId" />
+    <PropertyColumn Property="bookingpage => bookingpage.StudentId" />
+    <PropertyColumn Property="bookingpage => bookingpage.BookingDate" />
+    <PropertyColumn Property="bookingpage => bookingpage.Note" />
+    <PropertyColumn Property="bookingpage => bookingpage.Status" />
+    <PropertyColumn Property="bookingpage => bookingpage.ValidFrom" />
+    <PropertyColumn Property="bookingpage => bookingpage.ValidTo" />
+
+    <TemplateColumn Context="bookingpage">
+        <a href="@($"bookingpages/edit?id={bookingpage.Id}")">Edit</a> |
+        <a href="@($"bookingpages/details?id={bookingpage.Id}")">Details</a> |
+        <a href="@($"bookingpages/delete?id={bookingpage.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

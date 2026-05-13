@@ -1,0 +1,61 @@
+@page "/coursematerials/create"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>CourseMaterial</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="CourseMaterial" OnValidSubmit="AddCourseMaterial" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="courseid" class="form-label">CourseId:</label> 
+                <input id="courseid" @bind="CourseMaterial.CourseId" class="form-control" type="text" /> 
+                <ValidationMessage For="() => CourseMaterial.CourseId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="materialid" class="form-label">MaterialId:</label> 
+                <input id="materialid" @bind="CourseMaterial.MaterialId" class="form-control" type="text" /> 
+                <ValidationMessage For="() => CourseMaterial.MaterialId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="validfrom" class="form-label">ValidFrom:</label> 
+                <InputDate id="validfrom" @bind-Value="CourseMaterial.ValidFrom" class="form-control" /> 
+                <ValidationMessage For="() => CourseMaterial.ValidFrom" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="validto" class="form-label">ValidTo:</label> 
+                <InputDate id="validto" @bind-Value="CourseMaterial.ValidTo" class="form-control" /> 
+                <ValidationMessage For="() => CourseMaterial.ValidTo" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/coursematerials">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private CourseMaterial CourseMaterial { get; set; } = default!;
+
+    protected override void OnInitialized() => CourseMaterial ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddCourseMaterial()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.CourseMaterial.Add(CourseMaterial);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/coursematerials");
+    }
+}

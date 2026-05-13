@@ -8,7 +8,10 @@
       "Bash(Select-String -NotMatch \"warning\")",
       "PowerShell(cd \"c:\\\\Users\\\\erikm\\\\source\\\\repos\\\\Meeskonnaprojekt_Konsultatsioon\\\\Soft\\\\ConsApp\\\\ConsApp\"; dotnet build 2>&1 | Where-Object { $_ -match \" error \" -and $_ -notmatch \"warning\" })",
       "PowerShell(cd \"c:\\\\Users\\\\erikm\\\\source\\\\repos\\\\Meeskonnaprojekt_Konsultatsioon\\\\Soft\\\\ConsApp\\\\ConsApp\"; dotnet build 2>&1 | Where-Object { $_ -match \": error \" })",
-      "PowerShell(cd \"c:\\\\Users\\\\erikm\\\\source\\\\repos\\\\Meeskonnaprojekt_Konsultatsioon\"; dotnet build 2>&1 | Where-Object { $_ -match \": error \" })"
+      "PowerShell(cd \"c:\\\\Users\\\\erikm\\\\source\\\\repos\\\\Meeskonnaprojekt_Konsultatsioon\"; dotnet build 2>&1 | Where-Object { $_ -match \": error \" })",
+      "PowerShell(cd \"c:\\\\Users\\\\erikm\\\\source\\\\repos\\\\Meeskonnaprojekt_Konsultatsioon\"; dotnet build 2>&1 | Where-Object { $_ -match \": error \" } | Select-Object -Unique)",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.nuget\\\\packages\" -Directory | Select-Object Name | Where-Object { $_.Name -match \"code|scaffold|generator|aspnet\" })",
+      "PowerShell(dotnet tool list -g 2>&1)"
     ]
   }
 }
