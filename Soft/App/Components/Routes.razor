@@ -1,7 +1,6 @@
-﻿<Router AppAssembly="typeof(Abc.Razor.Pages.Home).Assembly"
-        NotFoundPage="typeof(Abc.Razor.Pages.NotFound)">
+﻿<Router AppAssembly="typeof(Soft.App.Components.Routes).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Soft.App.Components.Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
