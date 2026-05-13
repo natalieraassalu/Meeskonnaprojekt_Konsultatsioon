@@ -1,4 +1,4 @@
-using ConsApp.Client.Pages;
+﻿using ConsApp.Client.Pages;
 using ConsApp.Components;
 using ConsApp.Components.Account;
 using ConsApp.Data;
@@ -28,6 +28,8 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -54,6 +56,7 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseMigrationsEndPoint();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();

@@ -15,4 +15,5 @@ namespace Abc.Data;
     [Random(0, 5, 2)] public decimal Price { get; set; }
     public Money Money { get; set; }
     public Country Country { get; set; }
+    [Timestamp] public byte[] Timestamp { get; set; } = [];
 }

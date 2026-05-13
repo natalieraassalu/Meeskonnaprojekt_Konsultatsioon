@@ -1,5 +1,6 @@
 ﻿using Abc.Aids;
 using Abc.Data.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Abc.Data;
 
@@ -10,5 +11,5 @@ public sealed class Currency : NamedEntity
     [Random(1, 1, "abcdefgh")] public string MinorUnitSymbol { get; set; } = "";
     [Random(0, 1, 4)] public double RatioOfMinorUnit { get; set; }
     public bool IsIsoCurrency { get; set; }
-
+    [Timestamp] public byte[] Timestamp { get; set; } = [];
 }

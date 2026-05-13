@@ -1,5 +1,6 @@
 ﻿using Abc.Aids;
 using Abc.Data.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Abc.Data;
 
@@ -13,5 +14,5 @@ public sealed class Country : NamedEntity
     [Random(4, 5, "KLMNOPQRS")] public string IsoCode { get; set; } = "";
     public ICollection<CountryCurrency> CountryCurrencies { get; set; } = [];
     public ICollection<Currency> Currencies =>[.. CountryCurrencies.Select(c=>c.Currency)];
-
+    [Timestamp] public byte[] Timestamp { get; set; } = [];
 }
