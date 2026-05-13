@@ -1,0 +1,9 @@
+﻿
+@foreach (var p in Entity?.GetType().GetProperties()??[])
+{
+    <MyPropertyViewer Label="@p.Name"Value="@p.GetValue(Entity)?.ToString()"/>
+}
+
+@code {
+    [Parameter]public object Entity { get; set; }
+}

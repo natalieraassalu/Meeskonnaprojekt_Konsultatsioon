@@ -1,0 +1,32 @@
+﻿@using Abc.Data.Common
+@using System.Collections
+@using Abc.Infra
+
+@typeparam TEntity where TEntity : BaseEntity
+
+<a href="@($"{BasePath}/edit?id={Item.Id}")">Edit</a> |
+<a href="@($"{BasePath}/details?id={Item.Id}")">Details</a> |
+<a href="@($"{BasePath}/delete?id={Item.Id}")">Delete</a>
+@if (hasCollection) {
+    <span> | </span>
+    <a href="@collectionHref">
+        @(isCollectionVisible ? "Close" : "Select")
+    </a>
+}
+
+
+@code {
+    [Parameter] public TEntity Item { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public Query Query { get; set; }
+    private bool hasCollection
+        => typeof(TEntity).GetProperties().Any(
+            p => typeof(IEnumerable).IsAssignableFrom(p.PropertyType)
+                 && isCollectionOfClasses(p.PropertyType));
+    private bool isCollectionOfClasses(Type t) {
+        var e = t.IsGenericType ? t.GetGenericArguments()[0] : t.GetElementType();
+        return e != null && e.IsClass && e != typeof(string);
+    }
+    private string collectionHref => Query?.Href(BasePath, Item.Id) ?? string.Empty;
+    private bool isCollectionVisible => Query != null && Query.Selected == Item?.Id.ToString();
+}

@@ -1,0 +1,28 @@
+﻿<PageTitle>@PageTitleText</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>@EntityTitle</h2>
+    <hr />
+    @if (Entity is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <MyEntityViewer Entity="Entity" />
+        <div>
+            <a href="@($"{BasePath}/edit?id={EntityId}")">Edit</a> |
+            <a href="@BasePath">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string PageTitleText { get; set; } = "Details";
+    [Parameter] public string EntityTitle { get; set; }
+    [Parameter] public object Entity { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public Guid? EntityId { get; set; }
+}

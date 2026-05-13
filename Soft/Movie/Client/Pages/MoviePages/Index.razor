@@ -1,0 +1,16 @@
+﻿@page "/movies"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoviesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="Movie"
+             PageTitleText="Movies Page"
+             EntityTitle="Movies"
+             Repo="repo"
+             BasePath="movies">
+</MyIndexPage>
+
+@code {
+}

@@ -1,0 +1,22 @@
+﻿@page "/money/create"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoneyRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="money" 
+              EntityTitle="Money" 
+              BasePath="/money" 
+              OnValidSubmit="add" />
+
+
+@code {
+    [SupplyParameterFromForm] private Money money { get; set; } = default!;
+    protected override void OnInitialized() => money ??= new();
+    private async Task add()
+    {
+        await repo.CreateAsync(money);
+        NavigationManager.NavigateTo("/money");
+    }
+}

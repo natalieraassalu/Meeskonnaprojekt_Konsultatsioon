@@ -1,0 +1,38 @@
+﻿@using Abc.Infra
+@using System.Reflection
+
+<div class="header-stack">
+    <a href="@headerHref()">@iconed</a>
+    <form method="get" action="@BasePath">
+        <input type="hidden" name="@nameof(Query.SortDir)" value="@Query.SortDir" />
+        <input type="hidden" name="@nameof(Query.PageSize)" value="@Query.PageSize" />
+        <input type="hidden" name="@nameof(Query.Page)" value="1" />
+        <input type="hidden" name="@nameof(Query.SortBy)" value="@Query.SortBy" />
+        <input type="hidden" name="@nameof(Query.SearchBy)" value="@PropertyInfo.Name" />
+        <input type="search" class="form-control form-control-sm"
+               name="@nameof(Query.SearchStr)" value="@searchStr" disabled="@isDisabled" placeholder="Search..." />
+    </form>
+</div>
+
+@code {
+    [Parameter] public Query Query { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public PropertyInfo PropertyInfo { get; set; }
+    private string name => PropertyInfo.Name;
+    private string icon => Query?.SortDir == "asc" ? " ▲" : Query?.SortDir == "desc" ? " ▼" : string.Empty;
+    private string iconed => (Query?.SortBy == name) ? name + icon : name;
+    private string searchStr => (Query?.SearchBy == name) ? Query.SearchStr : "";
+    private bool isDisabled => PropertyInfo?.PropertyType != typeof(string);
+    private string headerHref() //=> Query.Href(BasePath, name);
+    {
+        var n = ((Query?.SortBy == name) && (Query?.SortDir == "desc")) ? null : name;
+        var d = Query?.SortBy != name ? "asc" : "desc";
+        var r = $"{BasePath}?Page=1&PageSize={Query?.PageSize ?? 7}";
+
+        r = string.IsNullOrEmpty(Query?.SearchStr)
+            ? r : r += $"&SearchBy={Query.SearchBy}&SearchStr={Query.SearchStr}";
+
+        return (n is null) ? r : r + $"&SortBy={n}&SortDir={d}";
+    }
+}
+

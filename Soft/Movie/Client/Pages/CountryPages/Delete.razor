@@ -1,0 +1,33 @@
+﻿@page "/countries/delete"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountriesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Country" EntityTitle="Country" Entity="country" BasePath="/countries" OnValidSubmit="deleteCountry">
+    <MyPropertyViewer Label="Id" Value="@country.Id.ToString()" />
+    <MyPropertyViewer Label="Name" Value="@country.Name" />
+    <MyPropertyViewer Label="Code" Value="@country.Code" />
+    @*     <MyEntityViewer Entity="country" />
+ *@
+</MyDeletePage> 
+
+@code {
+    private Country country;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        country = await repo.GetAsync(Id);
+        if (country is null) NavigationManager.NavigateTo("/countries");
+        
+    }
+
+    private async Task deleteCountry()
+    {
+        await repo.DeleteAsync(country.Id);
+        NavigationManager.NavigateTo("/countries");
+    }
+}

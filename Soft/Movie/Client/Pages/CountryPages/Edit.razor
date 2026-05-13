@@ -1,0 +1,28 @@
+﻿@page "/countries/edit"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountriesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage PageTitleText="Edit Country"
+            EntityTitle="@country?.Name"
+            Entity="country"
+            BasePath="/countries"
+            EntityId="@Id"
+            OnValidSubmit="updateCountry" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm(Name = nameof(Country))] private Country country { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        country ??= await repo.GetAsync(Id);
+        if (country is null) NavigationManager.NotFound();
+    }
+    private async Task updateCountry()
+    {
+        await repo.UpdateAsync(country!);
+        NavigationManager.NavigateTo("/countries");
+    }
+}

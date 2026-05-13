@@ -1,0 +1,22 @@
+﻿@page "/money/details"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoneyRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Money"
+    EntityTitle="Money"
+    Entity="item"
+    EntityId="item?.Id"
+    BasePath="/money" />
+
+@code {
+    private Money item;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        item = await repo.GetAsync(Id);
+        if (item is null) NavigationManager.NotFound();
+    }
+}

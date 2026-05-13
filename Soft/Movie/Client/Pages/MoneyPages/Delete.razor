@@ -1,0 +1,30 @@
+﻿@page "/money/delete"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoneyRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Money" 
+              EntityTitle="Money" 
+              Entity="item" 
+              BasePath="/money" 
+              OnValidSubmit="delete" />
+
+@code {
+    private Money item;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        item = await repo.GetAsync(Id);
+        if (item is null) NavigationManager.NavigateTo("/money");
+    }
+
+    private async Task delete()
+    {
+        await repo.DeleteAsync(item.Id);
+        NavigationManager.NavigateTo("/money");
+    }
+}

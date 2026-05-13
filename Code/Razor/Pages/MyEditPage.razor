@@ -1,0 +1,45 @@
+﻿<PageTitle>@PageTitleText</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>@EntityTitle</h2>
+<hr />
+@if (Entity is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Entity" OnValidSubmit="HandleValidSubmit" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="@idField" value="@EntityId" />
+                <MyEntityEditor Entity="Entity" />
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="@BasePath">Back to List</a>
+</div>
+
+@code {
+    [Parameter] public string PageTitleText { get; set; } = "Create";
+    [Parameter] public string EntityTitle { get; set; }
+    [Parameter] public object Entity { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public Guid? EntityId { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    // [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private string idField => Entity is null ? "Id" : $"{Entity.GetType().Name}.Id";
+    private async Task HandleValidSubmit()
+    {
+        if (OnValidSubmit.HasDelegate) await OnValidSubmit.InvokeAsync();
+    }
+
+}

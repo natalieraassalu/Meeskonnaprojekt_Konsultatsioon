@@ -1,0 +1,22 @@
+﻿@page "/movies/details"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoviesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Movie"
+    EntityTitle="Movie"
+    Entity="movie"
+    EntityId="movie?.Id"
+    BasePath="/movies" />
+
+@code {
+    private Movie movie;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        movie = await repo.GetAsync(Id);
+        if (movie is null) NavigationManager.NotFound();
+    }
+}

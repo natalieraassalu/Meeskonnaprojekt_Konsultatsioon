@@ -1,0 +1,66 @@
+﻿@using Abc.Razor.Components
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Natalie veebirakendus</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <MyNavLink Href="" Match="NavLinkMatch.All" IconClass="home-icon" Text="Home"/>
+        <MyNavLink Href="movies" IconClass="movie-icon" Text="Movies"/>
+        <MyNavLink Href="countries" IconClass="country-icon" Text="Countries"/>
+        <MyNavLink Href="currencies" IconClass="currency-icon" Text="Currencies" />
+        <MyNavLink Href="countryCurrencies" IconClass="country-icon" Text="Currency Use"/>
+        <MyNavLink Href="money" IconClass="country-icon" Text="Money" />
+        <MyNavLink Href="counter" IconClass="counter-icon" Text="Counter"/>
+        <MyNavLink Href="weather" IconClass="list-icon" Text="Weather"/>
+        <MyNavLink Href="auth" IconClass="lock-icon" Text="Auth Required"/>
+
+        <AuthorizeView>
+            <Authorized>
+                <MyNavLink Href="Account/Manage" IconClass="person-icon" Text="@Name"/>
+                <MyNavLink Href="Account/Logout" IconClass="arrow-icon" Text="Logout">
+                        <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl"/>
+                </MyNavLink>
+            </Authorized>
+            <NotAuthorized>
+                <MyNavLink Href="Account/Register" IconClass="bi-register-icon" Text="Register"/>
+                <MyNavLink Href="Account/Login" IconClass="bi-badge-icon" Text="Login"/>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private string currentUrl;
+    private string Name;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        var context = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Name = context.User.Identity?.Name ?? string.Empty;
+    }
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+

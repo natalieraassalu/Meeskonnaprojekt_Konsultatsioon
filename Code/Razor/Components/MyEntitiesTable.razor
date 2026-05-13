@@ -1,0 +1,126 @@
+﻿@using Abc.Aids
+@using Abc.Data.Common
+@using Abc.Infra
+@using Abc.Shared.Code
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Reflection
+@using System.Collections
+@using Abc.Razor.Code
+
+@typeparam TEntity where TEntity : BaseEntity
+@implements IDisposable
+
+<MyQuickGrid Entities="@Entities" BasePath="@BasePath" Query="@query"/>
+@if (isSelected(selectedItem)) {
+    foreach (var c in new RelatedLists(selectedItem)) {
+        var items = c.Items;
+        var cols = c.Properties;
+        <div class="panel">
+            <div class="header">
+                <span>@c.Name (@c.Count)</span>
+                <a href="@closHref(selectedItem)" aria-label="Close" class="close">×</a>
+            </div>
+            <QuickGrid Class="table myTable" Items="items">
+                @foreach (var p in cols) {
+                    @if (!MyGridAids.Show(p)) continue;
+                    <TemplateColumn>
+                        <HeaderTemplate>@p.Name</HeaderTemplate>
+                        <ChildContent Context="y">
+                            @(MyGridAids.Value(p, y))
+                        </ChildContent>
+                    </TemplateColumn>
+                }
+            </QuickGrid>
+        </div>
+    }
+}
+
+@if (Others.Any()) {
+    <MyQuickGrid Entities="@Others" BasePath="@BasePath" Query="@query" ShowHeader ="@false"/>
+}
+<MyTablePageNav Query = "@query" TotalCount="@totalCount" CurrentUri="@nav.Uri" />
+
+
+@code {
+    private IQueryable<TEntity> Entities { get; set; } = Enumerable.Empty<TEntity>().AsQueryable();
+    private IQueryable<TEntity> Others { get; set; } = Enumerable.Empty<TEntity>().AsQueryable();
+    [Parameter] public IRepo<TEntity> Repo { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Inject] private NavigationManager nav { get; set; }
+    private int totalCount;
+    private Query query=new();
+    private TEntity selectedItem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        nav.LocationChanged += onLocationChanged;
+        await loadAsync();
+    }
+    private async Task loadAsync() 
+    {
+
+    if (Repo is null) return;
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        query = new UrlParams(uri).Parse();
+        totalCount = await Repo.CountAsync(query);
+        var toOthers = false;
+        var entities = new List<TEntity>();
+        var others = new List<TEntity>();
+        var all = (await Repo.GetAsync(query)).ToList();
+        foreach (var e in all) {
+            if (toOthers) {
+                others.Add(e);
+                continue;
+            }
+            entities.Add(e);
+            if (e.Id.ToString() != query.Selected) continue;
+            toOthers = true;
+            selectedItem = e;
+        }
+        Entities = entities.AsQueryable();
+        Others = others.AsQueryable();
+    }
+    private void onLocationChanged(object sender, LocationChangedEventArgs e) 
+        => _ = InvokeAsync(async () =>
+        {
+            await loadAsync();
+            StateHasChanged();
+        });
+    private bool isSelected(TEntity e) => query.Selected == e?.Id.ToString();
+    private string closHref(TEntity e) => query.Href(BasePath, e.Id);
+    public void Dispose() => nav.LocationChanged -= onLocationChanged;
+}
+
+<style>
+     .myTable {
+        table-layout: fixed;
+        width: 100%;
+        max-width: 100%;
+    }
+
+        .myTable td {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+   .panel {
+        margin: .5rem 0;
+        padding: .75rem;
+        background: #fafafa;
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .5rem;
+        font-weight: 600;
+    }
+    .close {
+        text-decoration: none;
+        color: inherit;
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+</style>

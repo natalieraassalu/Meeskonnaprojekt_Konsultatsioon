@@ -1,0 +1,54 @@
+﻿@using Abc.Aids
+@using Abc.Data.Common
+@using Abc.Infra
+@using Abc.Shared.Code
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Reflection
+@using System.Collections
+
+@typeparam TEntity where TEntity : BaseEntity
+
+<QuickGrid Class="table myTable" Items="@Entities">
+    @foreach (var p in typeof(TEntity).GetProperties()) {
+        @if (!MyGridAids.Show(p)) continue;
+        <TemplateColumn>
+            <HeaderTemplate>
+                @if (ShowHeader && ShowMyHeader) {
+                    <MyTableHeader Query="@Query" BasePath="@BasePath" PropertyInfo="@p" />
+                } else if (ShowHeader) { @p.Name }
+            </HeaderTemplate>
+            <ChildContent Context="y">
+                @(MyGridAids.Value(p, y))
+            </ChildContent>
+        </TemplateColumn>
+    }
+    @if (ShowButtons) {
+        <TemplateColumn Context="y">
+            <MyTableRowButtons TEntity="TEntity" Item="@y" BasePath="@BasePath" Query="@Query" />
+        </TemplateColumn>
+    }
+</QuickGrid>
+
+
+@code {
+    [Parameter] public IQueryable<TEntity> Entities { get; set; }
+    [Parameter] public Query Query { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public bool ShowHeader { get; set; } = true;
+    [Parameter] public bool ShowMyHeader { get; set; } = true;
+    [Parameter] public bool ShowButtons { get; set; } = true;
+}
+
+<style>
+    .myTable {
+        table-layout: fixed;
+        width: 100%;
+        max-width: 100%;
+    }
+
+        .myTable td {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+</style>

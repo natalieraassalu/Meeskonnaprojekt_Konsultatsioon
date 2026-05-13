@@ -1,0 +1,33 @@
+﻿<PageTitle>@PageTitleText</PageTitle>
+
+<h1>Create</h1>
+
+<h2>@EntityTitle</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Entity" OnValidSubmit="@HandleValidSubmit" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <MyEntityEditor Entity="Entity" />
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="@BasePath">Back to List</a>
+</div>
+
+@code {
+    [Parameter] public string PageTitleText { get; set; } = "Create";
+    [Parameter] public string EntityTitle { get; set; }
+    [Parameter] public object Entity { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    // [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private async Task HandleValidSubmit() {
+        if (OnValidSubmit.HasDelegate) await OnValidSubmit.InvokeAsync();
+    }
+}

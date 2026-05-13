@@ -1,0 +1,26 @@
+﻿@page "/movies/delete"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMoviesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Movie" EntityTitle="Movie" Entity="movie" BasePath="/movies" OnValidSubmit="deleteMovie" />
+
+@code {
+    private Movie movie;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        movie = await repo.GetAsync(Id);
+        if (movie is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteMovie()
+    {
+        await repo.DeleteAsync(movie.Id);
+        NavigationManager.NavigateTo("/movies");
+    }
+}

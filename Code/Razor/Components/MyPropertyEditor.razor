@@ -1,0 +1,20 @@
+﻿<dl class="row">
+    @if (ad.HasProperty) {
+        <dt class="col-md-4">
+            <label for="@PropertyName" class="form-label">@ad.DisplayName</label>
+        </dt>
+        <dd class="col-md-8">
+            @if (ad.HasEditor) {
+                <DynamicComponent Type="@ad.Editor" Parameters="@ad.EditorParams" />
+                <DynamicComponent Type="@ad.Validator" Parameters="@ad.ValidationParams" />
+            }
+        </dd>
+    }
+</dl>
+
+@code {
+    private IEditorAdapter ad;
+    [Parameter] public object Item { get; set; }
+    [Parameter] public string PropertyName { get; set; } = string.Empty;
+    protected override void OnParametersSet() => ad = new EditorAdapter(this, Item, PropertyName);
+}

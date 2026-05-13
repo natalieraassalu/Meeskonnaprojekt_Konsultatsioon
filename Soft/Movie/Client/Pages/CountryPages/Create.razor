@@ -1,0 +1,18 @@
+﻿@page "/countries/create"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountriesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="country" EntityTitle="Country" BasePath="/countries" OnValidSubmit="addCountry" />
+
+@code {
+    [SupplyParameterFromForm(Name = nameof(Country))] private Country country { get; set; } = default!;
+    protected override void OnInitialized() => country ??= new();
+    private async Task addCountry()
+    {
+        await repo.CreateAsync(country);
+        NavigationManager.NavigateTo("/countries");
+    }
+}

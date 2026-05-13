@@ -1,0 +1,63 @@
+﻿@using Abc.Infra
+@using Abc.Razor
+<div class="d-flex align-items-center gap-2">
+    @if (isFirstPage)
+    {
+        <span>First</span>
+        <span>Prev</span>
+    }
+    else
+    {
+        <a href="@firstHref">First</a>
+        <a href="@prevHref">Prev</a>
+    }
+    
+    <span>Page @pageNo / @totalPages() </span>
+
+    @if (isLastPage)
+    {
+        <span>Next</span>
+        <span>Last</span>
+    }
+    else
+    {
+        <a href="@nextHref">Next</a>
+        <a href="@lastHref">Last</a>
+    }
+    
+    <span>Total: @TotalCount Rows: </span>
+    @foreach (var s in Query.PageSizes)
+    {
+        if (s == pageSize)
+        {
+            <span>@s</span>
+        }
+        else
+        {
+            <a href="@sizeHref(s)">@s</a>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string CurrentUri { get; set; }
+    [Parameter] public Query Query { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    private string baseUri => (CurrentUri ?? string.Empty).Split('?', 2)[0];
+    private int pageNo => Query?.Page ?? 1;
+    private int pageSize => Query?.PageSize ?? 1;
+    private int totalPages()
+    {
+        if (pageSize <= 0) return TotalCount;
+        var p = TotalCount / pageSize;
+        if (TotalCount % pageSize > 0) p++;
+        return p;
+    }
+    private bool isFirstPage => pageNo == 1;
+    private bool isLastPage => pageNo == totalPages();
+    private string firstHref => Query.Href(baseUri, 1, pageSize);
+    private string prevHref => Query.Href(baseUri, pageNo - 1, pageSize);
+    private string nextHref => Query.Href(baseUri, pageNo + 1, pageSize);
+    private string lastHref => Query.Href(baseUri, totalPages(), pageSize);
+    private string sizeHref(int s) => Query.Href(baseUri, 1, s);
+}

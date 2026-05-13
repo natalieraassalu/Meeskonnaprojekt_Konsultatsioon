@@ -1,0 +1,18 @@
+﻿@page "/countries"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject NavigationManager NavigationManager
+@inject ICountriesRepo repo
+
+
+<MyIndexPage 
+    TItem="Country" 
+    PageTitleText="Countries" 
+    EntityTitle="Countries" 
+    Repo="repo" 
+    BasePath="countries">
+</MyIndexPage>
+
+@code {
+}

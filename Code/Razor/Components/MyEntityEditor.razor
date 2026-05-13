@@ -1,0 +1,7 @@
+﻿@foreach (var p in Entity?.GetType().GetProperties() ?? []) {
+    <MyPropertyEditor Item="Entity" PropertyName="@p.Name" />
+}
+
+@code {
+    [Parameter] public object Entity { get; set; }
+}

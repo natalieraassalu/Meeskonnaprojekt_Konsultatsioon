@@ -1,0 +1,30 @@
+﻿@page "/countrycurrencies/edit"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountryCurrenciesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage 
+    PageTitleText="Edit Country Currency" 
+    EntityTitle="Country Currency" 
+    Entity="item" 
+    BasePath="/countrycurrencies"
+    EntityId="@Id"
+            OnValidSubmit="update" />
+
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm(Name = nameof(CountryCurrency))] private CountryCurrency item { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        item ??= await repo.GetAsync(Id);
+        if (item is null) NavigationManager.NotFound();
+    }
+    private async Task update()
+    {
+        await repo.UpdateAsync(item!);
+        NavigationManager.NavigateTo("/countrycurrencies");
+    }
+}

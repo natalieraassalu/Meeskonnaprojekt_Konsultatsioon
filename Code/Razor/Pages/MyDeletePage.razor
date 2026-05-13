@@ -1,0 +1,35 @@
+﻿<PageTitle>@PageTitleText</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>@EntityTitle</h2>
+    <hr />
+    @if (Entity is null) {
+        <p><em>Loading...</em></p>
+    } else {
+        @if (ChildContent is not null) {
+            @ChildContent
+        } else {
+            <MyEntityViewer Entity="Entity" />
+        }
+        <EditForm method="post" Model="Entity" OnValidSubmit="HandleValidSubmit" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(Entity is null)">Delete</button> |
+            <a href="@BasePath">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public string PageTitleText { get; set; } = "Delete";
+    [Parameter] public string EntityTitle { get; set; }
+    [Parameter] public object Entity { get; set; }
+    [Parameter] public string BasePath { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private async Task HandleValidSubmit() {
+        if (OnValidSubmit.HasDelegate) await OnValidSubmit.InvokeAsync();
+    }
+}

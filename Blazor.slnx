@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/Code/">
+    <Project Path="Code/Aids/Aids.csproj" />
+    <Project Path="Code/Data/Data.csproj" />
+    <Project Path="Code/Domain/Domain.csproj" Id="bbb14dda-d53c-49b0-902f-b9fc31dc2518" />
+    <Project Path="Code/Infra/Infra.csproj" Id="f05b6a1c-31c6-48f7-88f8-b5c3bae86647" />
+    <Project Path="Code/Jobs/Jobs.csproj" Id="0e4a5949-7bd3-48cb-85d6-5151eb3f25c9" />
+    <Project Path="Code/Razor/Razor.csproj" />
+  </Folder>
+  <Folder Name="/Soft/" />
+  <Folder Name="/Soft/App/">
+    <Project Path="Soft/App/App.csproj" />
+  </Folder>
+  <Folder Name="/Soft/Movie/">
+    <Project Path="Soft/Movie/Client/Movie.Client.csproj" />
+    <Project Path="Soft/Movie/Server/Movie.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Aids/Tests.Aids.csproj" />
+    <Project Path="Tests/Data/Tests.Data.csproj" />
+    <Project Path="Tests/Domain/Tests.Domain.csproj" />
+    <Project Path="Tests/Infra/Tests.Infra.csproj" />
+    <Project Path="Tests/Jobs/Tests.Jobs.csproj" />
+    <Project Path="Tests/Razor/Tests.Razor.csproj" />
+  </Folder>
+</Solution>

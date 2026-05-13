@@ -1,0 +1,25 @@
+﻿@page "/countries/details"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountriesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Country"
+    EntityTitle="Country"
+    Entity="country"
+    EntityId="country?.Id"
+    BasePath="/countries" />
+
+@code {
+    private Country country;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        country = await repo.GetAsync(Id);
+        if (country is null) NavigationManager.NavigateTo("/countries");
+    }
+}

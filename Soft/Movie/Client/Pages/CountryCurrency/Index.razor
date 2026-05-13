@@ -1,0 +1,16 @@
+﻿@page "/countrycurrencies"
+@using Abc.Data
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICountryCurrenciesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="CountryCurrency"
+             PageTitleText="Country Currencies Page"
+             EntityTitle="Country Currency"
+             Repo="repo"
+             BasePath="/countrycurrencies">
+</MyIndexPage>
+
+@code {
+}
