@@ -1,0 +1,40 @@
+﻿@page "/courseselectors"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Abc.Data.Consultation
+@using ConsApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="courseselectors/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.CourseSelector">
+    <PropertyColumn Property="courseselector => courseselector.CourseId" />
+    <PropertyColumn Property="courseselector => courseselector.LecturerId" />
+    <PropertyColumn Property="courseselector => courseselector.StudentId" />
+    <PropertyColumn Property="courseselector => courseselector.ValidFrom" />
+    <PropertyColumn Property="courseselector => courseselector.ValidTo" />
+
+    <TemplateColumn Context="courseselector">
+        <a href="@($"courseselectors/edit?id={courseselector.Id}")">Edit</a> |
+        <a href="@($"courseselectors/details?id={courseselector.Id}")">Details</a> |
+        <a href="@($"courseselectors/delete?id={courseselector.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

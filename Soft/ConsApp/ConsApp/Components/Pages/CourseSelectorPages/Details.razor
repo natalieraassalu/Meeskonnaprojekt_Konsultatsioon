@@ -1,0 +1,54 @@
+﻿@page "/courseselectors/details"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>CourseSelector</h2>
+    <hr />
+    @if (courseselector is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CourseId</dt>
+            <dd class="col-sm-10">@courseselector.CourseId</dd>
+            <dt class="col-sm-2">LecturerId</dt>
+            <dd class="col-sm-10">@courseselector.LecturerId</dd>
+            <dt class="col-sm-2">StudentId</dt>
+            <dd class="col-sm-10">@courseselector.StudentId</dd>
+            <dt class="col-sm-2">ValidFrom</dt>
+            <dd class="col-sm-10">@courseselector.ValidFrom</dd>
+            <dt class="col-sm-2">ValidTo</dt>
+            <dd class="col-sm-10">@courseselector.ValidTo</dd>
+        </dl>
+        <div>
+            <a href="@($"/courseselectors/edit?id={courseselector.Id}")">Edit</a> |
+            <a href="@($"/courseselectors")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private CourseSelector? courseselector;
+
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courseselector = await context.CourseSelector.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (courseselector is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+}

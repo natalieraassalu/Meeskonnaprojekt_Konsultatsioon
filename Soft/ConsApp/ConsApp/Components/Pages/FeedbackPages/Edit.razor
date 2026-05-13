@@ -1,0 +1,114 @@
+﻿@page "/feedbacks/edit"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Feedback</h2>
+<hr />
+@if (Feedback is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Feedback" OnValidSubmit="UpdateFeedback" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Feedback.Id" value="@Feedback.Id" />
+                <div class="mb-3">
+                    <label for="bookingid" class="form-label">BookingId:</label>
+                    <InputText id="bookingid" @bind-Value="Feedback.BookingId" class="form-control" />
+                    <ValidationMessage For="() => Feedback.BookingId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating:</label>
+                    <InputNumber id="rating" @bind-Value="Feedback.Rating" class="form-control" />
+                    <ValidationMessage For="() => Feedback.Rating" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="comment" class="form-label">Comment:</label>
+                    <InputText id="comment" @bind-Value="Feedback.Comment" class="form-control" />
+                    <ValidationMessage For="() => Feedback.Comment" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdat" class="form-label">CreatedAt:</label>
+                    <InputDate id="createdat" @bind-Value="Feedback.CreatedAt" class="form-control" />
+                    <ValidationMessage For="() => Feedback.CreatedAt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="validfrom" class="form-label">ValidFrom:</label>
+                    <InputDate id="validfrom" @bind-Value="Feedback.ValidFrom" class="form-control" />
+                    <ValidationMessage For="() => Feedback.ValidFrom" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="validto" class="form-label">ValidTo:</label>
+                    <InputDate id="validto" @bind-Value="Feedback.ValidTo" class="form-control" />
+                    <ValidationMessage For="() => Feedback.ValidTo" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/feedbacks">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Feedback? Feedback { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Feedback ??= await context.Feedback.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Feedback is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateFeedback()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Feedback!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!FeedbackExists(Feedback!.Id))
+            {
+                NavigationManager.NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/feedbacks");
+    }
+
+    private bool FeedbackExists(Guid id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Feedback.Any(e => e.Id == id);
+    }
+}

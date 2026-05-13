@@ -9,5 +9,7 @@ namespace ConsApp.Data
         public DbSet<Abc.Data.Consultation.Role> Role { get; set; }
         public DbSet<Abc.Data.Consultation.Student> Student { get; set; }
         public DbSet<Abc.Data.Consultation.User> User { get; set; }
+        public DbSet<Abc.Data.Consultation.CourseSelector> CourseSelector { get; set; }
+        public DbSet<Abc.Data.Consultation.Feedback> Feedback { get; set; }
     }
 }
