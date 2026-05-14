@@ -42,7 +42,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Abc.Data.Status">
-    <Position X="2.75" Y="12.75" Width="1.5" />
+    <Position X="2.75" Y="12" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Cancellation.cs</FileName>

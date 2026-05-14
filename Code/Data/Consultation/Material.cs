@@ -8,5 +8,8 @@ using Abc.Data.Common;
 namespace Abc.Data.Consultation;
 
 
-public class Material : NamedEntity { }
+public class Material : NamedEntity
+{
+
+}
 
