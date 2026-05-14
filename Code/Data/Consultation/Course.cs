@@ -12,6 +12,5 @@ public sealed class Course : NamedEntity
     public DateTime ValidFrom { get; set; }        
     public DateTime ValidTo { get; set; }
     public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
-    public ICollection<Material> Materials => [.. CourseMaterials.Select(cm => cm.Material)];
     [Timestamp] public byte[] Timestamp { get; set; } = [];
 }

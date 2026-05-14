@@ -10,6 +10,5 @@ public sealed class Material : NamedEntity
     [Random(10, 30)] public string Author { get; set; } = "";
     [Random(20, 50)] public string Details { get; set; } = "";
     public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
-    public ICollection<Course> Courses => [.. CourseMaterials.Select(cm => cm.Course)];
     [Timestamp] public byte[] Timestamp { get; set; } = [];
 }
