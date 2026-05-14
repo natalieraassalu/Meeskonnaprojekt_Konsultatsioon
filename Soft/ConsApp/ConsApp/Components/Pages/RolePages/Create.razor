@@ -1,45 +1,32 @@
 @page "/roles/create"
+@attribute [ExcludeFromInteractiveRouting]
+@using ConsApp.Data
 @using Microsoft.EntityFrameworkCore
-@using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Role</PageTitle>
 
 <h1>Create</h1>
 
 <h2>Role</h2>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="Role" OnValidSubmit="AddRole" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="name" class="form-label">Name:</label> 
-                <InputText id="name" @bind-Value="Role.Name" class="form-control" /> 
-                <ValidationMessage For="() => Role.Name" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="code" class="form-label">Code:</label> 
-                <InputText id="code" @bind-Value="Role.Code" class="form-control" /> 
-                <ValidationMessage For="() => Role.Code" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="details" class="form-label">Details:</label> 
-                <InputText id="details" @bind-Value="Role.Details" class="form-control" /> 
-                <ValidationMessage For="() => Role.Details" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="Role.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => Role.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="Role.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => Role.ValidTo" class="text-danger" /> 
-            </div>        
+                <label for="name" class="form-label">Name:</label>
+                <InputSelect id="name" @bind-Value="Role.Name" class="form-control">
+                    <option value="">-- select role --</option>
+                    <option value="Student">Student</option>
+                    <option value="Lecturer">Lecturer</option>
+                </InputSelect>
+                <ValidationMessage For="() => Role.Name" class="text-danger" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -51,16 +38,15 @@
 
 @code {
     [SupplyParameterFromForm]
-    private Role Role { get; set; } = default!;
+    private Role Role { get; set; } = new();
 
-    protected override void OnInitialized() => Role ??= new();
-
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddRole()
     {
         using var context = DbFactory.CreateDbContext();
+
         context.Role.Add(Role);
         await context.SaveChangesAsync();
+
         NavigationManager.NavigateTo("/roles");
     }
 }

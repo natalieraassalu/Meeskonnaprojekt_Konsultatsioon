@@ -1,0 +1,101 @@
+﻿@page "/userroles/edit"
+@attribute [ExcludeFromInteractiveRouting]
+
+@using Abc.Data.Consultation
+@using ConsApp.Data
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Routing
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>UserRole</h2>
+<hr />
+
+@if (UserRole is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="UserRole" OnValidSubmit="UpdateUserRole" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+
+                <input type="hidden" name="UserRole.Id" value="@UserRole.Id" />
+
+                <div class="mb-3">
+                    <label for="userid" class="form-label">User:</label>
+                    <InputSelect id="userid" @bind-Value="UserRole.UserId" class="form-control">
+                        <option value="@Guid.Empty">-- select user --</option>
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => UserRole.UserId" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="roleid" class="form-label">Role:</label>
+                    <InputSelect id="roleid" @bind-Value="UserRole.RoleId" class="form-control">
+                        <option value="@Guid.Empty">-- select role --</option>
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role.Id">@role.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => UserRole.RoleId" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/userroles">Back to List</a>
+</div>
+
+@code {
+    private UserRole? UserRole;
+
+    private List<User> users = [];
+    private List<Role> roles = [];
+
+    [SupplyParameterFromQuery]
+    private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        users = await context.User.ToListAsync();
+        roles = await context.Role.ToListAsync();
+
+        UserRole = await context.UserRole.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (UserRole is null)
+        {
+            NavigationManager.NavigateTo("/notfound");
+        }
+    }
+
+    private async Task UpdateUserRole()
+    {
+        if (UserRole is null) return;
+
+        using var context = DbFactory.CreateDbContext();
+
+        context.Attach(UserRole).State = EntityState.Modified;
+        await context.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/userroles");
+    }
+}

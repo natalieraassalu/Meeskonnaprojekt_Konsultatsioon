@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-ConsApp-8bbf02d0-d073-4438-a2e0-1015eb573b85</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+	  <NoWarn>$(NoWarn);NU1901</NoWarn>
+	  <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
 
   <ItemGroup>

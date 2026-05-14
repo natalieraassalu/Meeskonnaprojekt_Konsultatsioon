@@ -1,10 +1,10 @@
 @page "/users/create"
+@attribute [ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
-@using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create User</PageTitle>
 
 <h1>Create</h1>
 
@@ -24,16 +24,6 @@
                 <label for="email" class="form-label">Email:</label> 
                 <InputText id="email" @bind-Value="User.Email" class="form-control" /> 
                 <ValidationMessage For="() => User.Email" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="User.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => User.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="User.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => User.ValidTo" class="text-danger" /> 
             </div>        
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
