@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Abc.Data.Common;
+﻿using Abc.Data.Common;
 
 namespace Abc.Data.Consultation;
 
-public class CourseMaterial : BaseEntity
+public sealed class CourseMaterial : BaseEntity
 {
     public Guid CourseId { get; set; }
     public Guid MaterialId { get; set; }
+
+    public Course? Course { get; set; }
+    public Material? Material { get; set; }
 }

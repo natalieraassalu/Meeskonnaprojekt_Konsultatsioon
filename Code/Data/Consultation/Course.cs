@@ -2,4 +2,6 @@
 
 namespace Abc.Data.Consultation;
 
-public class Course : NamedEntity { }
+public sealed class Course : NamedEntity
+{
+}
