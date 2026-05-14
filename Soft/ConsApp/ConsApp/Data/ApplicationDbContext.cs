@@ -8,6 +8,7 @@ namespace ConsApp.Data
     {
         public DbSet<Abc.Data.Consultation.Role> Role { get; set; }
         public DbSet<Abc.Data.Consultation.User> User { get; set; }
+        public DbSet<Abc.Data.Consultation.UserRole> UserRole { get; set; }
         public DbSet<Abc.Data.Consultation.CourseSelector> CourseSelector { get; set; }
         public DbSet<Abc.Data.Consultation.Feedback> Feedback { get; set; }
         public DbSet<Abc.Data.Consultation.Material> Material { get; set; }
