@@ -1,4 +1,8 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+@using System.Reflection
+
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="GetAdditionalAssemblies()"
+        NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
@@ -8,3 +12,17 @@
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+
+@code {
+    // When running as InteractiveServer, Assembly.GetEntryAssembly() returns the
+    // server executable (ConsApp.dll), which contains the scaffolded pages.
+    // When running as WASM, it returns the WASM entry — a harmless duplicate of
+    // AppAssembly that the Router deduplicates automatically.
+    private static Assembly[] GetAdditionalAssemblies()
+    {
+        var entry = Assembly.GetEntryAssembly();
+        return entry != null && entry != typeof(Program).Assembly
+            ? new[] { entry }
+            : Array.Empty<Assembly>();
+    }
+}

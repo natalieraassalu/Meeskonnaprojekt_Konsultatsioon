@@ -1,6 +1,13 @@
 # fix-rendermode.ps1
-# Adds @rendermode InteractiveServer after the first @page line in every
-# .razor file inside ConsApp/Components/Pages/ subfolders.
+# Removes the per-page @rendermode InteractiveServer directive (and its comment)
+# from every scaffolded .razor file under ConsApp/Components/Pages/ subfolders.
+#
+# WHY: Setting @rendermode InteractiveServer on individual page components creates
+# a separate SignalR circuit per page. When navigating away the circuit tears down,
+# and any in-flight work (DB call, NavigateTo, StateHasChanged) hits a non-Connected
+# SignalR state and throws. The correct approach is to set interactivity once on
+# <Routes> in App.razor (already done), which keeps one persistent circuit alive
+# across all navigations. Individual pages should inherit it — no directive needed.
 
 param(
     [string]$PagesRoot = "Soft\ConsApp\ConsApp\Components\Pages"
@@ -10,33 +17,23 @@ $pagesPath = Join-Path $PSScriptRoot $PagesRoot
 $razorFiles = Get-ChildItem $pagesPath -Recurse -Filter "*.razor" |
               Where-Object { $_.DirectoryName -ne $pagesPath }
 
-$rendermodeBlock = @'
-@* Stay on the server, don't move to the browser *@
-@rendermode InteractiveServer
-'@
-
 $fixed = 0
 
 foreach ($file in $razorFiles) {
     $content = Get-Content $file.FullName -Raw
+    $original = $content
 
-    if ($content -match '@rendermode\s+InteractiveServer') {
-        Write-Host "OK:    $($file.Name) (already has @rendermode)"
-        continue
+    # Remove the comment line and the @rendermode line (both or either)
+    $content = $content -replace '\r?\n@\* Stay on the server, don''t move to the browser \*@', ''
+    $content = $content -replace '\r?\n@rendermode InteractiveServer', ''
+
+    if ($content -ne $original) {
+        Set-Content $file.FullName $content -NoNewline
+        $fixed++
+        Write-Host "FIXED: $($file.Name)"
+    } else {
+        Write-Host "OK:    $($file.Name) (nothing to remove)"
     }
-
-    $pageMatch = [regex]::Match($content, '(@page\s+"[^"]*"[^\r\n]*)')
-    if (-not $pageMatch.Success) {
-        Write-Host "SKIP:  $($file.Name) (no @page directive found)"
-        continue
-    }
-
-    $afterPage = $pageMatch.Index + $pageMatch.Length
-    $content = $content.Substring(0, $afterPage) + [System.Environment]::NewLine + $rendermodeBlock + $content.Substring($afterPage)
-
-    Set-Content $file.FullName $content -NoNewline
-    $fixed++
-    Write-Host "FIXED: $($file.Name)"
 }
 
 Write-Host ""
