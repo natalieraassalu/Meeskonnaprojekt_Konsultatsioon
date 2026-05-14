@@ -35,9 +35,9 @@
       <FileName>Consultation\Notification.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="Student" />
-      <Property Name="Lecturer" />
       <Property Name="ConsultationSlot" />
+      <Property Name="Lecturer" />
+      <Property Name="Student" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.CourseSelector">
@@ -56,7 +56,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.Course">
-    <Position X="6" Y="4.25" Width="1.5" />
+    <Position X="6.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Consultation\Course.cs</FileName>
@@ -87,8 +87,8 @@
       <FileName>Consultation\UserRole.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="Role" />
       <Property Name="User" />
+      <Property Name="Role" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.Material">
