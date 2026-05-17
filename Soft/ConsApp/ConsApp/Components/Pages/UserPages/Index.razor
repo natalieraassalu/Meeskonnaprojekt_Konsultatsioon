@@ -1,25 +1,23 @@
 @page "/users"
 @attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.EntityFrameworkCore
+
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using Abc.Data.Consultation
 @using ConsApp.Data
+@using Microsoft.EntityFrameworkCore
 @implements IAsyncDisposable
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Users</PageTitle>
 
-<h1>Index</h1>
+<h1>Users</h1>
 
 <p>
     <a href="users/create">Create New</a>
 </p>
 
 <QuickGrid Class="table" Items="context.User">
-    <PropertyColumn Property="user => user.Name" />
-    <PropertyColumn Property="user => user.Email" />
-    <PropertyColumn Property="user => user.ValidFrom" />
-    <PropertyColumn Property="user => user.ValidTo" />
+    <PropertyColumn Title="Name" Property="user => user.Name" />
+    <PropertyColumn Title="Email" Property="user => user.Email" />
 
     <TemplateColumn Context="user">
         <a href="@($"users/edit?id={user.Id}")">Edit</a> |

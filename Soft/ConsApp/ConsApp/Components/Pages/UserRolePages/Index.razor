@@ -1,0 +1,47 @@
+﻿@page "/userroles"
+@attribute [ExcludeFromInteractiveRouting]
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using ConsApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>UserRoles</PageTitle>
+
+<h1>UserRoles</h1>
+
+<p>
+    <a href="userroles/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="UserRoles">
+    <TemplateColumn Title="User" Context="userrole">
+        @userrole.User?.Name
+    </TemplateColumn>
+
+    <TemplateColumn Title="Role" Context="userrole">
+        @userrole.Role?.Name
+    </TemplateColumn>
+
+    <TemplateColumn Context="userrole">
+        <a href="@($"userroles/edit?id={userrole.Id}")">Edit</a> |
+        <a href="@($"userroles/details?id={userrole.Id}")">Details</a> |
+        <a href="@($"userroles/delete?id={userrole.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    private IQueryable<UserRole> UserRoles =>
+        context.UserRole
+            .Include(userrole => userrole.User)
+            .Include(userrole => userrole.Role);
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

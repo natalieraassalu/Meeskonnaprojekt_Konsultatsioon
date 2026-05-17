@@ -1,0 +1,85 @@
+﻿@page "/userroles/create"
+@attribute [ExcludeFromInteractiveRouting]
+@using ConsApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>UserRole</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="UserRole" OnValidSubmit="AddUserRole" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="mb-3">
+                <label for="userid" class="form-label">User:</label>
+                <InputSelect id="userid" @bind-Value="UserRole.UserId" class="form-control">
+                    <option value="@Guid.Empty">-- select user --</option>
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UserRole.UserId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="roleid" class="form-label">Role:</label>
+                <InputSelect id="roleid" @bind-Value="UserRole.RoleId" class="form-control">
+                    <option value="@Guid.Empty">-- select role --</option>
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role.Id">@role.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UserRole.RoleId" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/userroles">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private UserRole UserRole { get; set; } = new();
+
+    private List<User> users = [];
+    private List<Role> roles = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        users = await context.User.ToListAsync();
+        roles = await context.Role.ToListAsync();
+
+        UserRole ??= new UserRole();
+    }
+
+    private async Task AddUserRole()
+    {
+        if (UserRole.UserId == Guid.Empty || UserRole.RoleId == Guid.Empty)
+        {
+            return;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+
+        context.UserRole.Add(UserRole);
+        await context.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/userroles");
+    }
+}

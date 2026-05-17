@@ -18,5 +18,14 @@ namespace ConsApp.Data
         public DbSet<Abc.Data.Consultation.Course> Course { get; set; }
         public DbSet<Abc.Data.Consultation.CourseConsultation> CourseConsultation { get; set; }
         public DbSet<Abc.Data.Consultation.CourseMaterial> CourseMaterial { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            foreach (var relationship in builder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.NoAction;
+            }
+        }
     }
 }
