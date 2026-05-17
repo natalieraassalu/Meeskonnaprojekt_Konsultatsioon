@@ -1,0 +1,176 @@
+﻿@page "/courses/leht"
+
+<h3>Compon23ent</h3>
+<PageTitle>Kursusematerjalid</PageTitle>
+
+<h1>Kursusematerjalid</h1>
+
+<p class="lead">
+    Sellel lehel on koondatud kursuse olulisemad materjalid, nädalaplaan ja abistavad juhendid.
+    Sisu on praegu näidisena lisatud, et kursusematerjalide vaade oleks arenduse ajal paremini täidetud.
+</p>
+
+<section class="mb-4">
+    <h2>Kursuse ülevaade</h2>
+    <p>
+        Kursuse eesmärk on anda tudengile praktiline arusaam konsultatsioonide broneerimisest,
+        kursuse haldamisest ja õppematerjalide kasutamisest. Materjalid on jagatud teemade kaupa,
+        et vajalik info oleks kiiresti leitav enne konsultatsiooni või kodutöö tegemist.
+    </p>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="border rounded p-3 h-100">
+                <h3 class="h5">Kestus</h3>
+                <p class="mb-0">8 nädalat, üks põhiteema nädalas.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="border rounded p-3 h-100">
+                <h3 class="h5">Maht</h3>
+                <p class="mb-0">Loengumaterjalid, praktilised ülesanded ja iseseisev töö.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="border rounded p-3 h-100">
+                <h3 class="h5">Tugi</h3>
+                <p class="mb-0">Konsultatsioonid, kordamisküsimused ja juhendaja tagasiside.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-4">
+    <h2>Nädalaplaan</h2>
+    <table class="table table-striped table-bordered align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Nädal</th>
+                <th scope="col">Teema</th>
+                <th scope="col">Materjal</th>
+                <th scope="col">Tähtaeg</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Sissejuhatus kursusesse</td>
+                <td>Loenguslaidid ja kursuse juhend</td>
+                <td>12. september</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Andmemudelid ja olemid</td>
+                <td>ERD näited, klassiskeemid</td>
+                <td>19. september</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Blazori lehed ja vormid</td>
+                <td>Praktiline näidisprojekt</td>
+                <td>26. september</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Andmebaasi päringud</td>
+                <td>Entity Framework juhend</td>
+                <td>3. oktoober</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="mb-4">
+    <h2>Õppematerjalid</h2>
+    <table class="table table-hover table-bordered align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Pealkiri</th>
+                <th scope="col">Tüüp</th>
+                <th scope="col">Kirjeldus</th>
+                <th scope="col">Staatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Kursuse üldjuhend</td>
+                <td>PDF</td>
+                <td>Selgitab kursuse ülesehitust, hindamist ja tähtsamaid kuupäevi.</td>
+                <td><span class="badge bg-success">Avaldatud</span></td>
+            </tr>
+            <tr>
+                <td>Broneeringu loomise näide</td>
+                <td>Video</td>
+                <td>Näitab, kuidas tudeng saab konsultatsiooniaja valida ja kinnitada.</td>
+                <td><span class="badge bg-success">Avaldatud</span></td>
+            </tr>
+            <tr>
+                <td>Kodutöö mall</td>
+                <td>DOCX</td>
+                <td>Fail, mida saab kasutada iseseisva töö vormistamiseks.</td>
+                <td><span class="badge bg-warning text-dark">Uuendamisel</span></td>
+            </tr>
+            <tr>
+                <td>Korduma kippuvad küsimused</td>
+                <td>Leht</td>
+                <td>Lühivastused kõige tavalisematele kursuse ja konsultatsiooni küsimustele.</td>
+                <td><span class="badge bg-secondary">Mustand</span></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="mb-4">
+    <h2>Enne konsultatsiooni</h2>
+    <p>
+        Konsultatsioonist on kõige rohkem kasu siis, kui probleem on enne kohtumist selgelt kirja pandud.
+        Lisa broneeringu märkusesse lühike kirjeldus, millise ülesande, veateate või otsusega abi vajad.
+    </p>
+
+    <ul>
+        <li>Vaata läbi vastava nädala loengumaterjal.</li>
+        <li>Pane kirja konkreetne küsimus või takistus.</li>
+        <li>Lisa võimalusel veateade, ekraanipilt või failiviide.</li>
+        <li>Kontrolli, et projekt käivitub enne konsultatsiooni algust.</li>
+    </ul>
+</section>
+
+<section class="mb-4">
+    <h2>Hindamise näidistabel</h2>
+    <table class="table table-sm table-bordered align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Komponent</th>
+                <th scope="col">Osakaal</th>
+                <th scope="col">Mida hinnatakse</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Praktilised tööd</td>
+                <td>40%</td>
+                <td>Funktsionaalsus, vormistus ja seos kursuse teemadega.</td>
+            </tr>
+            <tr>
+                <td>Rühmaprojekt</td>
+                <td>45%</td>
+                <td>Rakenduse terviklikkus, andmemudel ja kasutajavoog.</td>
+            </tr>
+            <tr>
+                <td>Aktiivne osalemine</td>
+                <td>15%</td>
+                <td>Küsimused, konsultatsioonide kasutamine ja tagasiside arvestamine.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<div>
+    <a href="/courses">Tagasi kursuste nimekirja</a>
+</div>
+
+
+
+@code {
+
+}

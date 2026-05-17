@@ -19,5 +19,7 @@ namespace ConsApp.Data
         public DbSet<Abc.Data.Consultation.Course> Course { get; set; }
         public DbSet<Abc.Data.Consultation.CourseConsultation> CourseConsultation { get; set; }
         public DbSet<Abc.Data.Consultation.CourseMaterial> CourseMaterial { get; set; }
+
+        public DbSet<Status> Statuses { get; set; }
     }
 }

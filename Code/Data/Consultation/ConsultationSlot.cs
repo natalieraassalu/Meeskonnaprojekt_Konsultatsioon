@@ -11,6 +11,8 @@ public class ConsultationSlot : BaseEntity
 {
     public Guid CourseId { get; set; }
     public Guid LecturerId { get; set; }
+
+    public Guid StatusId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public string MeetingLink { get; set; } = string.Empty;

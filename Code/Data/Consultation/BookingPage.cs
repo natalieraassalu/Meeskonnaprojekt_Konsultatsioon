@@ -13,5 +13,5 @@ public class BookingPage : BaseEntity
     public Guid StudentId { get; set; }
     public DateTime BookingDate { get; set; }
     public string Note { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
+    public Guid StatusId { get; set; }
 }
