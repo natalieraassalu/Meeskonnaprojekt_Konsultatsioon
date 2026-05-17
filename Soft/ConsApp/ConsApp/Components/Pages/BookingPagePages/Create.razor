@@ -36,9 +36,9 @@
                 <ValidationMessage For="() => BookingPage.Note" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="BookingPage.Status" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.Status" class="text-danger" /> 
+                <label for="statusid" class="form-label">StatusId:</label> 
+                <input id="statusid" @bind="BookingPage.StatusId" class="form-control" type="text" /> 
+                <ValidationMessage For="() => BookingPage.StatusId" class="text-danger" /> 
             </div>        
             <div class="mb-3">
                 <label for="validfrom" class="form-label">ValidFrom:</label> 

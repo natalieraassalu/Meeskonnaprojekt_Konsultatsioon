@@ -1,4 +1,4 @@
-@page "/bookingpages/details"
+﻿@page "/bookingpages/details"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
@@ -25,8 +25,8 @@
             <dd class="col-sm-10">@bookingpage.BookingDate</dd>
             <dt class="col-sm-2">Note</dt>
             <dd class="col-sm-10">@bookingpage.Note</dd>
-            <dt class="col-sm-2">Status</dt>
-            <dd class="col-sm-10">@bookingpage.Status</dd>
+            <dt class="col-sm-2">StatusId</dt>
+            <dd class="col-sm-10">@bookingpage.StatusId</dd>
             <dt class="col-sm-2">ValidFrom</dt>
             <dd class="col-sm-10">@bookingpage.ValidFrom</dd>
             <dt class="col-sm-2">ValidTo</dt>

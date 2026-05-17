@@ -1,6 +1,5 @@
-@page "/bookingpages"
+﻿@page "/bookingpages"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
 @using ConsApp.Data
@@ -20,7 +19,7 @@
     <PropertyColumn Property="bookingpage => bookingpage.StudentId" />
     <PropertyColumn Property="bookingpage => bookingpage.BookingDate" />
     <PropertyColumn Property="bookingpage => bookingpage.Note" />
-    <PropertyColumn Property="bookingpage => bookingpage.Status" />
+    <PropertyColumn Property="bookingpage => bookingpage.StatusId" />
     <PropertyColumn Property="bookingpage => bookingpage.ValidFrom" />
     <PropertyColumn Property="bookingpage => bookingpage.ValidTo" />
 
