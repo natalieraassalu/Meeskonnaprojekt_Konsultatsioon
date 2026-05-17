@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Code\Data\Data.csproj" />
+    <ProjectReference Include="..\..\..\Code\Infra\Infra.csproj" />
     <ProjectReference Include="..\ConsApp.Client\ConsApp.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.8" />

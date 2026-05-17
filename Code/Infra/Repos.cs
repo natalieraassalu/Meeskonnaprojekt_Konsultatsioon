@@ -31,14 +31,14 @@ public class CoursesRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, Course>(c), ICoursesRepo
 {
     protected override IQueryable<Course> Query() => db.Courses
-        .Include(x => x.CourseMaterial)
+        .Include(x => x.CourseMaterials)
         .ThenInclude(x => x.Material);
 }
 public class MaterialsRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, Material>(c), IMaterialsRepo
 {
     protected override IQueryable<Material> Query() => db.Materials
-        .Include(x => x.CourseMaterial)
+        .Include(x => x.CourseMaterials)
         .ThenInclude(x => x.Course);
 }
 public class CourseMaterialsRepo(ApplicationDbContext c = null)

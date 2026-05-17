@@ -12,7 +12,7 @@ public sealed class Material : NamedEntity
 
     [Random(20, 50)] public string Details { get; set; } = "";
 
-    public ICollection<CourseMaterial> CourseMaterial { get; set; } = [];
+    public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
 
     [Timestamp] public byte[] Timestamp { get; set; } = [];
 }
