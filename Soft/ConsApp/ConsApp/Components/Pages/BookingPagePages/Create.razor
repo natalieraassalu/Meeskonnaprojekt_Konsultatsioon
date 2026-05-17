@@ -4,53 +4,67 @@
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Booking</PageTitle>
 
-<h1>Create</h1>
-
-<h2>BookingPage</h2>
+<h1>Create Booking</h1>
 <hr />
+
+@if (errorMessage != null)
+{
+    <!-- Show an error message in red if something goes wrong -->
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="BookingPage" OnValidSubmit="AddBookingPage" FormName="create" Enhance>
+        <EditForm Model="BookingPage" OnValidSubmit="AddBookingPage">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- Dropdown to pick an available slot instead of typing a Guid -->
             <div class="mb-3">
-                <label for="slotid" class="form-label">SlotId:</label> 
-                <input id="slotid" @bind="BookingPage.SlotId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => BookingPage.SlotId" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Select Consultation Slot:</label>
+                <select class="form-control" @bind="BookingPage.SlotId">
+                    <option value="">-- Pick a slot --</option>
+                    @foreach (var slot in availableSlots)
+                    {
+                        <!-- Show start time and end time so student knows when the slot is -->
+                        <option value="@slot.Id">@slot.StartTime.ToString("g") - @slot.EndTime.ToString("g")</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Dropdown to pick a student instead of typing a Guid -->
             <div class="mb-3">
-                <label for="studentid" class="form-label">StudentId:</label> 
-                <input id="studentid" @bind="BookingPage.StudentId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => BookingPage.StudentId" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Select Student:</label>
+                <select class="form-control" @bind="BookingPage.StudentId">
+                    <option value="">-- Pick a student --</option>
+                    @foreach (var student in students)
+                    {
+                        <option value="@student.Id">@student.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Dropdown to pick a status -->
             <div class="mb-3">
-                <label for="bookingdate" class="form-label">BookingDate:</label> 
-                <InputDate id="bookingdate" @bind-Value="BookingPage.BookingDate" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.BookingDate" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Status:</label>
+                <select class="form-control" @bind="BookingPage.StatusId">
+                    <option value="">-- Pick a status --</option>
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status.Id">@status.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Note field stays as a text input -->
             <div class="mb-3">
-                <label for="note" class="form-label">Note:</label> 
-                <InputText id="note" @bind-Value="BookingPage.Note" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.Note" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="statusid" class="form-label">StatusId:</label> 
-                <input id="statusid" @bind="BookingPage.StatusId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => BookingPage.StatusId" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="BookingPage.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="BookingPage.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.ValidTo" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+                <label class="form-label">Note:</label>
+                <InputText @bind-Value="BookingPage.Note" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Book Slot</button>
         </EditForm>
     </div>
 </div>
@@ -60,17 +74,71 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private BookingPage BookingPage { get; set; } = default!;
+    // The booking object we are filling in
+    private BookingPage BookingPage { get; set; } = new();
 
-    protected override void OnInitialized() => BookingPage ??= new();
+    // Lists for the dropdowns - loaded when the page opens
+    private List<ConsultationSlot> availableSlots = new();
+    private List<Student> students = new();
+    private List<Status> statuses = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // Error message shown to user if something goes wrong
+    private string? errorMessage;
+
+    // This runs when the page first loads - fills the dropdowns
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Only show slots that are NOT already booked
+        availableSlots = await context.ConsultationSlot
+            .Where(s => s.IsBooked == false)
+            .ToListAsync();
+
+        // Load all students for the dropdown
+        students = await context.Student.ToListAsync();
+
+        // Load all statuses for the dropdown
+        statuses = await context.Statuses.ToListAsync();
+
+        // Set booking date to today automatically
+        BookingPage.BookingDate = DateTime.Now;
+    }
+
+    // This runs when the user clicks "Book Slot"
     private async Task AddBookingPage()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Find the slot the student picked
+        var slot = await context.ConsultationSlot
+            .FirstOrDefaultAsync(s => s.Id == BookingPage.SlotId);
+
+        // If slot not found, show error and stop
+        if (slot == null)
+        {
+            errorMessage = "Selected slot not found.";
+            return;
+        }
+
+        // If slot is already booked, show error and stop
+        if (slot.IsBooked)
+        {
+            errorMessage = "This slot is already booked. Please pick another one.";
+            return;
+        }
+
+        // Mark the slot as booked so nobody else can book it
+        slot.IsBooked = true;
+        context.ConsultationSlot.Update(slot);
+
+        // Save the booking record
         context.BookingPage.Add(BookingPage);
+
+        // Save both changes to the database at the same time
         await context.SaveChangesAsync();
+
+        // Go back to the bookings list
         NavigationManager.NavigateTo("/bookingpages");
     }
 }

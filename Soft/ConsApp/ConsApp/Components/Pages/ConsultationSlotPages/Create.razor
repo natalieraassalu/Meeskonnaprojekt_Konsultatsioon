@@ -4,58 +4,77 @@
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Consultation Slot</PageTitle>
 
-<h1>Create</h1>
-
-<h2>ConsultationSlot</h2>
+<h1>Create Consultation Slot</h1>
 <hr />
+
+@if (errorMessage != null)
+{
+    <!-- Show error in red if something goes wrong -->
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="ConsultationSlot" OnValidSubmit="AddConsultationSlot" FormName="create" Enhance>
+        <EditForm Model="ConsultationSlot" OnValidSubmit="AddConsultationSlot">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- Dropdown to pick a course -->
             <div class="mb-3">
-                <label for="courseid" class="form-label">CourseId:</label> 
-                <input id="courseid" @bind="ConsultationSlot.CourseId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => ConsultationSlot.CourseId" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Select Course:</label>
+                <select class="form-control" @bind="ConsultationSlot.CourseId">
+                    <option value="">-- Pick a course --</option>
+                    @foreach (var course in courses)
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Dropdown to pick a lecturer -->
             <div class="mb-3">
-                <label for="lecturerid" class="form-label">LecturerId:</label> 
-                <input id="lecturerid" @bind="ConsultationSlot.LecturerId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => ConsultationSlot.LecturerId" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Select Lecturer:</label>
+                <select class="form-control" @bind="ConsultationSlot.LecturerId">
+                    <option value="">-- Pick a lecturer --</option>
+                    @foreach (var lecturer in lecturers)
+                    {
+                        <option value="@lecturer.Id">@lecturer.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Dropdown to pick a status -->
             <div class="mb-3">
-                <label for="starttime" class="form-label">StartTime:</label> 
-                <InputDate id="starttime" @bind-Value="ConsultationSlot.StartTime" class="form-control" /> 
-                <ValidationMessage For="() => ConsultationSlot.StartTime" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Status:</label>
+                <select class="form-control" @bind="ConsultationSlot.StatusId">
+                    <option value="">-- Pick a status --</option>
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status.Id">@status.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Start and end time pickers -->
             <div class="mb-3">
-                <label for="endtime" class="form-label">EndTime:</label> 
-                <InputDate id="endtime" @bind-Value="ConsultationSlot.EndTime" class="form-control" /> 
-                <ValidationMessage For="() => ConsultationSlot.EndTime" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Start Time:</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="ConsultationSlot.StartTime" class="form-control" />
+            </div>
+
             <div class="mb-3">
-                <label for="meetinglink" class="form-label">MeetingLink:</label> 
-                <InputText id="meetinglink" @bind-Value="ConsultationSlot.MeetingLink" class="form-control" /> 
-                <ValidationMessage For="() => ConsultationSlot.MeetingLink" class="text-danger" /> 
-            </div>        
+                <label class="form-label">End Time:</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="ConsultationSlot.EndTime" class="form-control" />
+            </div>
+
+            <!-- Meeting link text box -->
             <div class="mb-3">
-                <label for="isbooked" class="form-label">IsBooked:</label> 
-                <InputCheckbox id="isbooked" @bind-Value="ConsultationSlot.IsBooked" class="form-check-input" /> 
-                <ValidationMessage For="() => ConsultationSlot.IsBooked" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="ConsultationSlot.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => ConsultationSlot.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="ConsultationSlot.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => ConsultationSlot.ValidTo" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
+                <label class="form-label">Meeting Link:</label>
+                <InputText @bind-Value="ConsultationSlot.MeetingLink" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Slot</button>
         </EditForm>
     </div>
 </div>
@@ -65,17 +84,41 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private ConsultationSlot ConsultationSlot { get; set; } = default!;
+    // The slot object we are filling in
+    private ConsultationSlot ConsultationSlot { get; set; } = new();
 
-    protected override void OnInitialized() => ConsultationSlot ??= new();
+    // Lists for the dropdowns
+    private List<Course> courses = new();
+    private List<Lecturer> lecturers = new();
+    private List<Status> statuses = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // Error message shown if something goes wrong
+    private string? errorMessage;
+
+    // Runs when page loads - fills the dropdowns
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        courses = await context.Course.ToListAsync();
+        lecturers = await context.Lecturer.ToListAsync();
+        statuses = await context.Statuses.ToListAsync();
+
+        // IsBooked starts as false - nobody has booked it yet
+        ConsultationSlot.IsBooked = false;
+    }
+
+    // Runs when lecturer clicks "Create Slot"
     private async Task AddConsultationSlot()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Make sure IsBooked is false when creating a new slot
+        ConsultationSlot.IsBooked = false;
+
         context.ConsultationSlot.Add(ConsultationSlot);
         await context.SaveChangesAsync();
+
         NavigationManager.NavigateTo("/consultationslots");
     }
 }
