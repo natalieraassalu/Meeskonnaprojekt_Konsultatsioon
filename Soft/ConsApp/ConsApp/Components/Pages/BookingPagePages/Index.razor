@@ -1,43 +1,48 @@
 @page "/bookingpages"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Booking Pages</PageTitle>
 
-<h1>Index</h1>
+<h1>Booking Pages</h1>
 
 <p>
     <a href="bookingpages/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.BookingPage">
-    <PropertyColumn Property="bookingpage => bookingpage.SlotId" />
-    <PropertyColumn Property="bookingpage => bookingpage.StudentId" />
-    <PropertyColumn Property="bookingpage => bookingpage.BookingDate" />
-    <PropertyColumn Property="bookingpage => bookingpage.Note" />
-    <PropertyColumn Property="bookingpage => bookingpage.Status" />
-    <PropertyColumn Property="bookingpage => bookingpage.ValidFrom" />
-    <PropertyColumn Property="bookingpage => bookingpage.ValidTo" />
-
-    <TemplateColumn Context="bookingpage">
-        <a href="@($"bookingpages/edit?id={bookingpage.Id}")">Edit</a> |
-        <a href="@($"bookingpages/details?id={bookingpage.Id}")">Details</a> |
-        <a href="@($"bookingpages/delete?id={bookingpage.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>SlotId</th>
+            <th>BookingDate</th>
+            <th>Note</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bookingpage in bookingpages)
+        {
+            <tr>
+                <td>@bookingpage.SlotId</td>
+                <td>@bookingpage.BookingDate.ToShortDateString()</td>
+                <td>@bookingpage.Note</td>
+                <td>
+                    <a href="@($"bookingpages/edit?id={bookingpage.Id}")">Edit</a> |
+                    <a href="@($"bookingpages/details?id={bookingpage.Id}")">Details</a> |
+                    <a href="@($"bookingpages/delete?id={bookingpage.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<BookingPage> bookingpages = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        bookingpages = await context.BookingPage.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

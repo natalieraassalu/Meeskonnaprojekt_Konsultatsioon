@@ -1,17 +1,52 @@
-﻿@page "/courses"
-@using Abc.Data
+@page "/courses"
+@using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@using Abc.Infra
-@attribute [ExcludeFromInteractiveRouting]
-@inject ICoursesRepo repo
-@inject NavigationManager NavigationManager
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<MyIndexPage TItem="Course"
-             PageTitleText="Courses Page"
-             EntityTitle="Courses"
-             Repo="repo"
-             BasePath="courses">
-</MyIndexPage>
+<PageTitle>Courses</PageTitle>
+
+<h1>Courses</h1>
+
+<p>
+    <a href="courses/create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Details</th>
+            <th>ValidFrom</th>
+            <th>ValidTo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var course in courses)
+        {
+            <tr>
+                <td>@course.Name</td>
+                <td>@course.Code</td>
+                <td>@course.Details</td>
+                <td>@course.ValidFrom.ToShortDateString()</td>
+                <td>@course.ValidTo.ToShortDateString()</td>
+                <td>
+                    <a href="@($"courses/edit?id={course.Id}")">Edit</a> |
+                    <a href="@($"courses/details?id={course.Id}")">Details</a> |
+                    <a href="@($"courses/delete?id={course.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
+    private List<Course> courses = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courses = await context.Course.ToListAsync();
+    }
 }

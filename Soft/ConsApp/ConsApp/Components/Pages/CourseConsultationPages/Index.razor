@@ -1,40 +1,50 @@
 @page "/courseconsultations"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Course Consultations</PageTitle>
 
-<h1>Index</h1>
+<h1>Course Consultations</h1>
 
 <p>
     <a href="courseconsultations/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.CourseConsultation">
-    <PropertyColumn Property="courseconsultation => courseconsultation.CourseId" />
-    <PropertyColumn Property="courseconsultation => courseconsultation.ConsultationSlotId" />
-    <PropertyColumn Property="courseconsultation => courseconsultation.ValidFrom" />
-    <PropertyColumn Property="courseconsultation => courseconsultation.ValidTo" />
-
-    <TemplateColumn Context="courseconsultation">
-        <a href="@($"courseconsultations/edit?id={courseconsultation.Id}")">Edit</a> |
-        <a href="@($"courseconsultations/details?id={courseconsultation.Id}")">Details</a> |
-        <a href="@($"courseconsultations/delete?id={courseconsultation.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>CourseId</th>
+            <th>ConsultationSlotId</th>
+            <th>ValidFrom</th>
+            <th>ValidTo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var courseconsultation in courseconsultations)
+        {
+            <tr>
+                <td>@courseconsultation.CourseId</td>
+                <td>@courseconsultation.ConsultationSlotId</td>
+                <td>@courseconsultation.ValidFrom</td>
+                <td>@courseconsultation.ValidTo</td>
+                <td>
+                    <a href="@($"courseconsultations/edit?id={courseconsultation.Id}")">Edit</a> |
+                    <a href="@($"courseconsultations/details?id={courseconsultation.Id}")">Details</a> |
+                    <a href="@($"courseconsultations/delete?id={courseconsultation.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<CourseConsultation> courseconsultations = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        courseconsultations = await context.CourseConsultation.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

@@ -1,44 +1,58 @@
 @page "/notifications"
-@attribute [ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Notifications</PageTitle>
 
-<h1>Index</h1>
+<h1>Notifications</h1>
 
 <p>
     <a href="notifications/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Notification">
-    <PropertyColumn Property="notification => notification.ConsultationSlotId" />
-    <PropertyColumn Property="notification => notification.LecturerId" />
-    <PropertyColumn Property="notification => notification.StudentId" />
-    <PropertyColumn Property="notification => notification.Message" />
-    <PropertyColumn Property="notification => notification.SentAt" />
-    <PropertyColumn Property="notification => notification.Status" />
-    <PropertyColumn Property="notification => notification.ValidFrom" />
-    <PropertyColumn Property="notification => notification.ValidTo" />
-
-    <TemplateColumn Context="notification">
-        <a href="@($"notifications/edit?id={notification.Id}")">Edit</a> |
-        <a href="@($"notifications/details?id={notification.Id}")">Details</a> |
-        <a href="@($"notifications/delete?id={notification.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ConsultationSlotId</th>
+            <th>LecturerId</th>
+            <th>StudentId</th>
+            <th>Message</th>
+            <th>SentAt</th>
+            <th>Status</th>
+            <th>ValidFrom</th>
+            <th>ValidTo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var notification in notifications)
+        {
+            <tr>
+                <td>@notification.ConsultationSlotId</td>
+                <td>@notification.LecturerId</td>
+                <td>@notification.StudentId</td>
+                <td>@notification.Message</td>
+                <td>@notification.SentAt</td>
+                <td>@notification.Status</td>
+                <td>@notification.ValidFrom</td>
+                <td>@notification.ValidTo</td>
+                <td>
+                    <a href="@($"notifications/edit?id={notification.Id}")">Edit</a> |
+                    <a href="@($"notifications/details?id={notification.Id}")">Details</a> |
+                    <a href="@($"notifications/delete?id={notification.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<Notification> notifications = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        notifications = await context.Notification.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

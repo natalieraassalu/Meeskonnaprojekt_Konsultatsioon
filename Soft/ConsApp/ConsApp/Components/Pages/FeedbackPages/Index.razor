@@ -1,42 +1,54 @@
 @page "/feedbacks"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Feedbacks</PageTitle>
 
-<h1>Index</h1>
+<h1>Feedbacks</h1>
 
 <p>
     <a href="feedbacks/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Feedback">
-    <PropertyColumn Property="feedback => feedback.BookingId" />
-    <PropertyColumn Property="feedback => feedback.Rating" />
-    <PropertyColumn Property="feedback => feedback.Comment" />
-    <PropertyColumn Property="feedback => feedback.CreatedAt" />
-    <PropertyColumn Property="feedback => feedback.ValidFrom" />
-    <PropertyColumn Property="feedback => feedback.ValidTo" />
-
-    <TemplateColumn Context="feedback">
-        <a href="@($"feedbacks/edit?id={feedback.Id}")">Edit</a> |
-        <a href="@($"feedbacks/details?id={feedback.Id}")">Details</a> |
-        <a href="@($"feedbacks/delete?id={feedback.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>BookingId</th>
+            <th>Rating</th>
+            <th>Comment</th>
+            <th>CreatedAt</th>
+            <th>ValidFrom</th>
+            <th>ValidTo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var feedback in feedbacks)
+        {
+            <tr>
+                <td>@feedback.BookingId</td>
+                <td>@feedback.Rating</td>
+                <td>@feedback.Comment</td>
+                <td>@feedback.CreatedAt</td>
+                <td>@feedback.ValidFrom</td>
+                <td>@feedback.ValidTo</td>
+                <td>
+                    <a href="@($"feedbacks/edit?id={feedback.Id}")">Edit</a> |
+                    <a href="@($"feedbacks/details?id={feedback.Id}")">Details</a> |
+                    <a href="@($"feedbacks/delete?id={feedback.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<Feedback> feedbacks = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        feedbacks = await context.Feedback.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

@@ -1,43 +1,55 @@
 @page "/consultationslots"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Consultation Slots</PageTitle>
 
-<h1>Index</h1>
+<h1>Consultation Slots</h1>
 
 <p>
     <a href="consultationslots/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.ConsultationSlot">
-    <PropertyColumn Property="consultationslot => consultationslot.LecturerId" />
-    <PropertyColumn Property="consultationslot => consultationslot.StartTime" />
-    <PropertyColumn Property="consultationslot => consultationslot.EndTime" />
-    <PropertyColumn Property="consultationslot => consultationslot.MeetingLink" />
-    <PropertyColumn Property="consultationslot => consultationslot.IsBooked" />
-    <PropertyColumn Property="consultationslot => consultationslot.ValidFrom" />
-    <PropertyColumn Property="consultationslot => consultationslot.ValidTo" />
-
-    <TemplateColumn Context="consultationslot">
-        <a href="@($"consultationslots/edit?id={consultationslot.Id}")">Edit</a> |
-        <a href="@($"consultationslots/details?id={consultationslot.Id}")">Details</a> |
-        <a href="@($"consultationslots/delete?id={consultationslot.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Lecturer</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Meeting Link</th>
+            <th>Is Booked</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var slot in slots)
+        {
+            <tr>
+                <!-- Show user name instead of LecturerId Guid -->
+                <td>@(users.FirstOrDefault(u => u.Id == slot.LecturerId)?.Name ?? "Unknown")</td>
+                <td>@slot.StartTime.ToString("g")</td>
+                <td>@slot.EndTime.ToString("g")</td>
+                <td>@slot.MeetingLink</td>
+                <td>@slot.IsBooked</td>
+                <td>
+                    <a href="@($"consultationslots/edit?id={slot.Id}")">Edit</a> |
+                    <a href="@($"consultationslots/details?id={slot.Id}")">Details</a> |
+                    <a href="@($"consultationslots/delete?id={slot.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<ConsultationSlot> slots = new();
+    private List<Abc.Data.Consultation.User> users = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        slots = await context.ConsultationSlot.ToListAsync();
+        users = await context.User.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

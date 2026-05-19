@@ -1,41 +1,52 @@
 @page "/courseselectors"
 @using Microsoft.EntityFrameworkCore
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Abc.Data.Consultation
-@using ConsApp.Data
-@implements IAsyncDisposable
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Course Selectors</PageTitle>
 
-<h1>Index</h1>
+<h1>Course Selectors</h1>
 
 <p>
     <a href="courseselectors/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.CourseSelector">
-    <PropertyColumn Property="courseselector => courseselector.CourseId" />
-    <PropertyColumn Property="courseselector => courseselector.LecturerId" />
-    <PropertyColumn Property="courseselector => courseselector.StudentId" />
-    <PropertyColumn Property="courseselector => courseselector.ValidFrom" />
-    <PropertyColumn Property="courseselector => courseselector.ValidTo" />
-
-    <TemplateColumn Context="courseselector">
-        <a href="@($"courseselectors/edit?id={courseselector.Id}")">Edit</a> |
-        <a href="@($"courseselectors/details?id={courseselector.Id}")">Details</a> |
-        <a href="@($"courseselectors/delete?id={courseselector.Id}")">Delete</a>
-    </TemplateColumn>
-</QuickGrid>
+<table class="table">
+    <thead>
+        <tr>
+            <th>CourseId</th>
+            <th>LecturerId</th>
+            <th>StudentId</th>
+            <th>ValidFrom</th>
+            <th>ValidTo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var courseselector in courseselectors)
+        {
+            <tr>
+                <td>@courseselector.CourseId</td>
+                <td>@courseselector.LecturerId</td>
+                <td>@courseselector.StudentId</td>
+                <td>@courseselector.ValidFrom</td>
+                <td>@courseselector.ValidTo</td>
+                <td>
+                    <a href="@($"courseselectors/edit?id={courseselector.Id}")">Edit</a> |
+                    <a href="@($"courseselectors/details?id={courseselector.Id}")">Details</a> |
+                    <a href="@($"courseselectors/delete?id={courseselector.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private List<CourseSelector> courseselectors = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        courseselectors = await context.CourseSelector.ToListAsync();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

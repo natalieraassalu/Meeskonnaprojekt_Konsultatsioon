@@ -1,5 +1,48 @@
-﻿<h3>Index</h3>
+@page "/materials"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Materials</PageTitle>
+
+<h1>Materials</h1>
+
+<p>
+    <a href="materials/create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Details</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var material in materials)
+        {
+            <tr>
+                <td>@material.Name</td>
+                <td>@material.Code</td>
+                <td>@material.Details</td>
+                <td>
+                    <a href="@($"materials/edit?id={material.Id}")">Edit</a> |
+                    <a href="@($"materials/details?id={material.Id}")">Details</a> |
+                    <a href="@($"materials/delete?id={material.Id}")">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
+    private List<Material> materials = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        materials = await context.Material.ToListAsync();
+    }
 }
