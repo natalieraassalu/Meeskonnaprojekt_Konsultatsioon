@@ -1,4 +1,5 @@
 ﻿using Abc.Data;
+using Abc.Data.Consultation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Abc.Infra;
@@ -25,5 +26,43 @@ public class CountryCurrenciesRepo(ApplicationDbContext c = null)
     protected override IQueryable<CountryCurrency> Query() => db.CountryCurrencies
         .Include(x => x.Country)
         .Include(x => x.Currency);
+}
+public class CoursesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Course>(c), ICoursesRepo
+{
+    protected override IQueryable<Course> Query() => db.Courses
+        .Include(x => x.CourseMaterials)
+        .ThenInclude(x => x.Material);
+}
+public class MaterialsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Material>(c), IMaterialsRepo
+{
+    protected override IQueryable<Material> Query() => db.Materials
+        .Include(x => x.CourseMaterials)
+        .ThenInclude(x => x.Course);
+}
+public class CourseMaterialsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, CourseMaterial>(c), ICourseMaterialsRepo
+{
+    protected override IQueryable<CourseMaterial> Query() => db.CourseMaterials
+        .Include(x => x.Course)
+        .Include(x => x.Material);
+}
+public class UsersRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, User>(c), IUsersRepo
+{
+}
+
+public class RolesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Role>(c), IRolesRepo
+{
+}
+
+public class UserRolesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, UserRole>(c), IUserRolesRepo
+{
+    protected override IQueryable<UserRole> Query() => db.UserRoles
+        .Include(x => x.User)
+        .Include(x => x.Role);
 }
 

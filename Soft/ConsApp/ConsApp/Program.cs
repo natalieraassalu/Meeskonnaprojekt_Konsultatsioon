@@ -1,7 +1,7 @@
-﻿using ConsApp.Client.Pages;
+﻿using Abc.Infra;
+using ConsApp.Client.Pages;
 using ConsApp.Components;
 using ConsApp.Components.Account;
-using ConsApp.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +41,13 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+builder.Services.AddScoped<ICoursesRepo, CoursesRepo>();
+builder.Services.AddScoped<IMaterialsRepo, MaterialsRepo>();
+builder.Services.AddScoped<ICourseMaterialsRepo, CourseMaterialsRepo>();
+builder.Services.AddScoped<IUsersRepo, UsersRepo>();
+builder.Services.AddScoped<IRolesRepo, RolesRepo>();
+builder.Services.AddScoped<IUserRolesRepo, UserRolesRepo>();
 
 var app = builder.Build();
 

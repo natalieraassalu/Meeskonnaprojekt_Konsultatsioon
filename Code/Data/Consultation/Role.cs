@@ -2,4 +2,6 @@
 
 namespace Abc.Data.Consultation;
 
-public sealed class Role : NamedEntity { }
+public sealed class Role : NamedEntity
+{
+}

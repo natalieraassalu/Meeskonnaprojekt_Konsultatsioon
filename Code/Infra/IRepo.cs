@@ -1,5 +1,6 @@
 ﻿using Abc.Data;
 using Abc.Data.Common;
+using Abc.Data.Consultation;
 
 namespace Abc.Infra;
 
@@ -18,3 +19,9 @@ public interface ICountriesRepo : IRepo<Country> { }
 public interface ICurrenciesRepo : IRepo<Currency> { }
 public interface IMoneyRepo : IRepo<Money> { }
 public interface ICountryCurrenciesRepo : IRepo<CountryCurrency> { }
+public interface ICoursesRepo : IRepo<Course> { }
+public interface IMaterialsRepo : IRepo<Material> { }
+public interface ICourseMaterialsRepo : IRepo<CourseMaterial> { }
+public interface IUsersRepo : IRepo<User> { }
+public interface IRolesRepo : IRepo<Role> { }
+public interface IUserRolesRepo : IRepo<UserRole> { }

@@ -16,11 +16,6 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="mb-3">
-                <label for="courseid" class="form-label">CourseId:</label> 
-                <input id="courseid" @bind="ConsultationSlot.CourseId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => ConsultationSlot.CourseId" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
                 <label for="lecturerid" class="form-label">LecturerId:</label> 
                 <input id="lecturerid" @bind="ConsultationSlot.LecturerId" class="form-control" type="text" /> 
                 <ValidationMessage For="() => ConsultationSlot.LecturerId" class="text-danger" /> 

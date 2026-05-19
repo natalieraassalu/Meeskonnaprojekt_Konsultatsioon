@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using Abc.Aids;
 using Abc.Data.Common;
 
 namespace Abc.Data.Consultation;
 
-public class CourseMaterial : BaseEntity
+public sealed class CourseMaterial : BaseEntity
 {
-    public Guid CourseId { get; set; }
-    public Guid MaterialId { get; set; }
+    [Select(typeof(Course))] public Guid? CourseId { get; set; }
+    [Select(typeof(Material))] public Guid? MaterialId { get; set; }
+
+    public Course? Course { get; set; }
+    public Material? Material { get; set; }
+    [Timestamp] public byte[] Timestamp { get; set; } = [];
 }

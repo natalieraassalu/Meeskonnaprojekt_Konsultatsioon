@@ -6,10 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-ConsApp-8bbf02d0-d073-4438-a2e0-1015eb573b85</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+	  <NoWarn>$(NoWarn);NU1901</NoWarn>
+	  <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Code\Data\Data.csproj" />
+    <ProjectReference Include="..\..\..\Code\Infra\Infra.csproj" />
     <ProjectReference Include="..\ConsApp.Client\ConsApp.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.8" />

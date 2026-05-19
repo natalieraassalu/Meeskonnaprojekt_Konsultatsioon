@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Abc.Aids;
 using Abc.Data.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Abc.Data.Consultation;
 
-
-public class Material : NamedEntity
+public sealed class Material : NamedEntity
 {
+    [Random(3, 5, "0123456789")] public string Number { get; set; } = "";
 
+    [Random(10, 30)] public string Author { get; set; } = "";
+
+    [Random(20, 50)] public string Details { get; set; } = "";
+
+    public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
+
+    [Timestamp] public byte[] Timestamp { get; set; } = [];
 }
-
