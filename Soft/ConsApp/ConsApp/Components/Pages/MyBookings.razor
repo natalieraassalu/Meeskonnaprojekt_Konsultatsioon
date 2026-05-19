@@ -33,13 +33,10 @@ else
         <tbody>
             @foreach (var booking in bookings)
             {
-                @* Find the slot this booking is for *@
-                @{
-                    var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
-                    var course = slot != null ? courses.FirstOrDefault(c => c.Id == slot.CourseId) : null;
-                    var lecturer = slot != null ? lecturers.FirstOrDefault(l => l.Id == slot.LecturerId) : null;
-                    var status = statuses.FirstOrDefault(s => s.Id == booking.StatusId);
-                }
+                var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
+                var course = slot != null ? courses.FirstOrDefault(c => c.Id == slot.CourseId) : null;
+                var lecturer = slot != null ? lecturers.FirstOrDefault(l => l.Id == slot.LecturerId) : null;
+                var status = statuses.FirstOrDefault(s => s.Id == booking.StatusId);
                 <tr>
                     <td>@(course?.Name ?? "Unknown")</td>
                     <td>@(lecturer?.Name ?? "Unknown")</td>
