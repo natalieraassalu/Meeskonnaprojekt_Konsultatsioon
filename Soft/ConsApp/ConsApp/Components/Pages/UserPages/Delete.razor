@@ -1,8 +1,7 @@
 @page "/users/delete"
 @attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.EntityFrameworkCore
-@using ConsApp.Data
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUsersRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Delete User</PageTitle>
@@ -44,9 +43,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        user = await context.User.FirstOrDefaultAsync(m => m.Id == Id);
+        user = await repo.GetAsync(Id);
 
         if (user is null)
         {
@@ -56,16 +53,7 @@
 
     private async Task DeleteUser()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        var userToDelete = await context.User.FirstOrDefaultAsync(x => x.Id == Id);
-
-        if (userToDelete is not null)
-        {
-            context.User.Remove(userToDelete);
-            await context.SaveChangesAsync();
-        }
-
+        await repo.DeleteAsync(Id);
         NavigationManager.NavigateTo("/users");
     }
 }

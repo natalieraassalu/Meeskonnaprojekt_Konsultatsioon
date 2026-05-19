@@ -1,9 +1,7 @@
 @page "/users/edit"
 @attribute [ExcludeFromInteractiveRouting]
-
-@using Microsoft.EntityFrameworkCore
-@using ConsApp.Data
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUsersRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit User</PageTitle>
@@ -58,9 +56,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        User ??= await context.User.FirstOrDefaultAsync(m => m.Id == Id);
+        User ??= await repo.GetAsync(Id);
 
         if (User is null)
         {
@@ -72,32 +68,7 @@ else
     {
         if (User is null) return;
 
-        using var context = DbFactory.CreateDbContext();
-
-        context.Attach(User).State = EntityState.Modified;
-
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!UserExists(User.Id))
-            {
-                NavigationManager.NavigateTo("/notfound");
-            }
-            else
-            {
-                throw;
-            }
-        }
-
+        await repo.UpdateAsync(User);
         NavigationManager.NavigateTo("/users");
-    }
-
-    private bool UserExists(Guid id)
-    {
-        using var context = DbFactory.CreateDbContext();
-        return context.User.Any(e => e.Id == id);
     }
 }

@@ -1,8 +1,9 @@
 ﻿@page "/userroles/create"
 @attribute [ExcludeFromInteractiveRouting]
-@using ConsApp.Data
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUserRolesRepo userRolesRepo
+@inject IUsersRepo usersRepo
+@inject IRolesRepo rolesRepo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
@@ -60,26 +61,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        users = await context.User.ToListAsync();
-        roles = await context.Role.ToListAsync();
-
         UserRole ??= new UserRole();
+
+        users = (await usersRepo.GetAsync(new Query())).ToList();
+        roles = (await rolesRepo.GetAsync(new Query())).ToList();
     }
 
     private async Task AddUserRole()
     {
+        if (UserRole is null) return;
+
         if (UserRole.UserId == Guid.Empty || UserRole.RoleId == Guid.Empty)
         {
             return;
         }
 
-        using var context = DbFactory.CreateDbContext();
-
-        context.UserRole.Add(UserRole);
-        await context.SaveChangesAsync();
-
+        await userRolesRepo.CreateAsync(UserRole);
         NavigationManager.NavigateTo("/userroles");
     }
 }

@@ -1,8 +1,7 @@
 @page "/users/details"
 @attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.EntityFrameworkCore
-@using ConsApp.Data
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUsersRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>User Details</PageTitle>
@@ -42,9 +41,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        user = await context.User.FirstOrDefaultAsync(m => m.Id == Id);
+        user = await repo.GetAsync(Id);
 
         if (user is null)
         {

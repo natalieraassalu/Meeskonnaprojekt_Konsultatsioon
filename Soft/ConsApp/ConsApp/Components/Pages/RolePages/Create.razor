@@ -1,8 +1,7 @@
 @page "/roles/create"
 @attribute [ExcludeFromInteractiveRouting]
-@using ConsApp.Data
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IRolesRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create Role</PageTitle>
@@ -40,13 +39,21 @@
     [SupplyParameterFromForm]
     private Role Role { get; set; } = new();
 
+    protected override void OnInitialized()
+    {
+        Role ??= new Role();
+    }
+
     private async Task AddRole()
     {
-        using var context = DbFactory.CreateDbContext();
+        if (Role is null) return;
 
-        context.Role.Add(Role);
-        await context.SaveChangesAsync();
+        if (string.IsNullOrWhiteSpace(Role.Name))
+        {
+            return;
+        }
 
+        await repo.CreateAsync(Role);
         NavigationManager.NavigateTo("/roles");
     }
 }

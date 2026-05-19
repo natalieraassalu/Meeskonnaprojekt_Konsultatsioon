@@ -1,10 +1,7 @@
 ﻿@page "/userroles/delete"
 @attribute [ExcludeFromInteractiveRouting]
-
-@using Microsoft.EntityFrameworkCore
-@using Abc.Data.Consultation
-@using ConsApp.Data
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUserRolesRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Delete</PageTitle>
@@ -46,12 +43,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        userrole = await context.UserRole
-            .Include(x => x.User)
-            .Include(x => x.Role)
-            .FirstOrDefaultAsync(m => m.Id == Id);
+        userrole = await repo.GetAsync(Id);
 
         if (userrole is null)
         {
@@ -61,16 +53,7 @@
 
     private async Task DeleteUserRole()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        var userRoleToDelete = await context.UserRole.FirstOrDefaultAsync(x => x.Id == Id);
-
-        if (userRoleToDelete is not null)
-        {
-            context.UserRole.Remove(userRoleToDelete);
-            await context.SaveChangesAsync();
-        }
-
+        await repo.DeleteAsync(Id);
         NavigationManager.NavigateTo("/userroles");
     }
 }

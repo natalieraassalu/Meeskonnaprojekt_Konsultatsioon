@@ -1,8 +1,7 @@
 @page "/roles/details"
 @attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.EntityFrameworkCore
-@using ConsApp.Data
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IRolesRepo repo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Role Details</PageTitle>
@@ -39,9 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        role = await context.Role.FirstOrDefaultAsync(m => m.Id == Id);
+        role = await repo.GetAsync(Id);
 
         if (role is null)
         {

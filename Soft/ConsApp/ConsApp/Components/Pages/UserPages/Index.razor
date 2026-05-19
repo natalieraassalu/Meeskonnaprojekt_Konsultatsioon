@@ -1,11 +1,8 @@
 @page "/users"
 @attribute [ExcludeFromInteractiveRouting]
-
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using ConsApp.Data
-@using Microsoft.EntityFrameworkCore
-@implements IAsyncDisposable
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUsersRepo repo
 
 <PageTitle>Users</PageTitle>
 
@@ -15,7 +12,7 @@
     <a href="users/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.User">
+<QuickGrid Class="table" Items="users">
     <PropertyColumn Title="Name" Property="user => user.Name" />
     <PropertyColumn Title="Email" Property="user => user.Email" />
 
@@ -27,12 +24,11 @@
 </QuickGrid>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private IQueryable<User> users = Enumerable.Empty<User>().AsQueryable();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        var result = await repo.GetAsync(new Query());
+        users = result.AsQueryable();
     }
-
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

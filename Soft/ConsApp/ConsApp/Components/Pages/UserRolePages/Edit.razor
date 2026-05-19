@@ -1,11 +1,10 @@
 ﻿@page "/userroles/edit"
 @attribute [ExcludeFromInteractiveRouting]
 
-@using Abc.Data.Consultation
-@using ConsApp.Data
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.Routing
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUserRolesRepo userRolesRepo
+@inject IUsersRepo usersRepo
+@inject IRolesRepo rolesRepo
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
@@ -64,7 +63,8 @@ else
 </div>
 
 @code {
-    private UserRole? UserRole;
+    [SupplyParameterFromForm]
+    private UserRole? UserRole { get; set; }
 
     private List<User> users = [];
     private List<Role> roles = [];
@@ -74,12 +74,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
+        users = (await usersRepo.GetAsync(new Query())).ToList();
+        roles = (await rolesRepo.GetAsync(new Query())).ToList();
 
-        users = await context.User.ToListAsync();
-        roles = await context.Role.ToListAsync();
-
-        UserRole = await context.UserRole.FirstOrDefaultAsync(m => m.Id == Id);
+        UserRole ??= await userRolesRepo.GetAsync(Id);
 
         if (UserRole is null)
         {
@@ -91,11 +89,12 @@ else
     {
         if (UserRole is null) return;
 
-        using var context = DbFactory.CreateDbContext();
+        if (UserRole.UserId == Guid.Empty || UserRole.RoleId == Guid.Empty)
+        {
+            return;
+        }
 
-        context.Attach(UserRole).State = EntityState.Modified;
-        await context.SaveChangesAsync();
-
+        await userRolesRepo.UpdateAsync(UserRole);
         NavigationManager.NavigateTo("/userroles");
     }
 }

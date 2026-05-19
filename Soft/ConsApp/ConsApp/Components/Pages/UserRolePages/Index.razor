@@ -1,10 +1,9 @@
 ﻿@page "/userroles"
 @attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using ConsApp.Data
-@implements IAsyncDisposable
-@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Abc.Infra
+@inject IUserRolesRepo repo
+
 
 <PageTitle>UserRoles</PageTitle>
 
@@ -14,7 +13,7 @@
     <a href="userroles/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="UserRoles">
+<QuickGrid Class="table" Items="userRoles">
     <TemplateColumn Title="User" Context="userrole">
         @userrole.User?.Name
     </TemplateColumn>
@@ -31,17 +30,12 @@
 </QuickGrid>
 
 @code {
-    private ApplicationDbContext context = default!;
+    private IQueryable<UserRole> userRoles = Enumerable.Empty<UserRole>().AsQueryable();
 
-    private IQueryable<UserRole> UserRoles =>
-        context.UserRole
-            .Include(userrole => userrole.User)
-            .Include(userrole => userrole.Role);
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        var result = await repo.GetAsync(new Query());
+        userRoles = result.AsQueryable();
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }
