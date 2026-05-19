@@ -45,6 +45,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 builder.Services.AddScoped<ICoursesRepo, CoursesRepo>();
 builder.Services.AddScoped<IMaterialsRepo, MaterialsRepo>();
 builder.Services.AddScoped<ICourseMaterialsRepo, CourseMaterialsRepo>();
+builder.Services.AddScoped<IUsersRepo, UsersRepo>();
+builder.Services.AddScoped<IRolesRepo, RolesRepo>();
+builder.Services.AddScoped<IUserRolesRepo, UserRolesRepo>();
 
 var app = builder.Build();
 

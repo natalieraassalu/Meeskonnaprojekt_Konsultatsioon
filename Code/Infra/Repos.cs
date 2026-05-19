@@ -48,4 +48,21 @@ public class CourseMaterialsRepo(ApplicationDbContext c = null)
         .Include(x => x.Course)
         .Include(x => x.Material);
 }
+public class UsersRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, User>(c), IUsersRepo
+{
+}
+
+public class RolesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Role>(c), IRolesRepo
+{
+}
+
+public class UserRolesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, UserRole>(c), IUserRolesRepo
+{
+    protected override IQueryable<UserRole> Query() => db.UserRoles
+        .Include(x => x.User)
+        .Include(x => x.Role);
+}
 

@@ -16,6 +16,9 @@ namespace Abc.Infra
         public DbSet<Course> Courses { get; set; } = default!;
         public DbSet<Material> Materials { get; set; } = default!;
         public DbSet<CourseMaterial> CourseMaterials { get; set; } = default!;
+        public DbSet<User> Users { get; set; } = default!;
+        public DbSet<Role> Roles { get; set; } = default!;
+        public DbSet<UserRole> UserRoles { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder b)
         {
