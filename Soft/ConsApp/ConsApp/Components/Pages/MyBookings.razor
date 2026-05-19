@@ -1,0 +1,122 @@
+﻿@page "/mybookings"
+@* Stay on the server, don't move to the browser *@
+@* TODO: Once roles are set up, filter bookings by the logged-in student's Id *@
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>My Bookings</PageTitle>
+
+<h1>My Bookings</h1>
+<hr />
+
+@if (bookings.Count == 0)
+{
+    <p>No bookings yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Lecturer</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Meeting Link</th>
+                <th>Booked On</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in bookings)
+            {
+                @* Find the slot this booking is for *@
+                @{
+                    var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
+                    var course = slot != null ? courses.FirstOrDefault(c => c.Id == slot.CourseId) : null;
+                    var lecturer = slot != null ? lecturers.FirstOrDefault(l => l.Id == slot.LecturerId) : null;
+                    var status = statuses.FirstOrDefault(s => s.Id == booking.StatusId);
+                }
+                <tr>
+                    <td>@(course?.Name ?? "Unknown")</td>
+                    <td>@(lecturer?.Name ?? "Unknown")</td>
+                    <td>@(slot?.StartTime.ToString("g") ?? "Unknown")</td>
+                    <td>@(slot?.EndTime.ToString("g") ?? "Unknown")</td>
+                    <td>@(slot?.MeetingLink ?? "-")</td>
+                    <td>@booking.BookingDate.ToString("g")</td>
+                    <td>@(status?.Name ?? "-")</td>
+                    <td>
+                        <!-- Cancel button - we will wire this up later -->
+                        <button class="btn btn-danger" @onclick="() => CancelBooking(booking.Id)">Cancel</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="mt-3">
+    <a href="/" class="btn btn-secondary">Back to Courses</a>
+</div>
+
+@code {
+    // TODO: Once roles are done, replace this with current logged-in student's bookings only
+
+    private List<BookingPage> bookings = new();
+    private List<ConsultationSlot> slots = new();
+    private List<Course> courses = new();
+    private List<Lecturer> lecturers = new();
+    private List<Status> statuses = new();
+
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    // Loads all data needed for the page
+    private async Task LoadData()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        bookings = await context.BookingPage.ToListAsync();
+        slots = await context.ConsultationSlot.ToListAsync();
+        courses = await context.Course.ToListAsync();
+        lecturers = await context.Lecturer.ToListAsync();
+        statuses = await context.Statuses.ToListAsync();
+    }
+
+    // Runs when student clicks Cancel on a booking
+    private async Task CancelBooking(Guid bookingId)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the booking
+        var booking = await context.BookingPage.FirstOrDefaultAsync(b => b.Id == bookingId);
+
+        if (booking is null) return;
+
+        // Find the slot and mark it as available again
+        var slot = await context.ConsultationSlot.FirstOrDefaultAsync(s => s.Id == booking.SlotId);
+
+        if (slot != null)
+        {
+            // Set slot back to available so someone else can book it
+            slot.IsBooked = false;
+            context.ConsultationSlot.Update(slot);
+        }
+
+        // Delete the booking record
+        context.BookingPage.Remove(booking);
+
+        await context.SaveChangesAsync();
+
+        // Reload the data so the page updates
+        await LoadData();
+    }
+}
