@@ -1,15 +1,16 @@
 @page "/consultationslots/edit"
+@* Stay on the server, don't move to the browser *@
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit</PageTitle>
+<PageTitle>Edit Consultation Slot</PageTitle>
 
-<h1>Edit</h1>
-
-<h2>ConsultationSlot</h2>
+<h1>Edit Consultation Slot</h1>
 <hr />
+
 @if (ConsultationSlot is null)
 {
     <p><em>Loading...</em></p>
@@ -18,50 +19,66 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm method="post" Model="ConsultationSlot" OnValidSubmit="UpdateConsultationSlot" FormName="edit" Enhance>
+            <EditForm Model="ConsultationSlot" OnValidSubmit="UpdateConsultationSlot">
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="ConsultationSlot.Id" value="@ConsultationSlot.Id" />
+                <ValidationSummary role="alert" />
+
+                <!-- Dropdown to pick a course - preselects current value -->
                 <div class="mb-3">
-                    <label for="courseid" class="form-label">CourseId:</label>
-                    <input id="courseid" @bind="ConsultationSlot.CourseId" class="form-control" type="text" />
-                    <ValidationMessage For="() => ConsultationSlot.CourseId" class="text-danger" />
+                    <label class="form-label">Select Course:</label>
+                    <select class="form-control" @bind="ConsultationSlot.CourseId">
+                        <option value="">-- Pick a course --</option>
+                        @foreach (var course in courses)
+                        {
+                            <option value="@course.Id">@course.Name</option>
+                        }
+                    </select>
                 </div>
+
+                <!-- Dropdown to pick a lecturer - preselects current value -->
                 <div class="mb-3">
-                    <label for="lecturerid" class="form-label">LecturerId:</label>
-                    <input id="lecturerid" @bind="ConsultationSlot.LecturerId" class="form-control" type="text" />
-                    <ValidationMessage For="() => ConsultationSlot.LecturerId" class="text-danger" />
+                    <label class="form-label">Select Lecturer:</label>
+                    <select class="form-control" @bind="ConsultationSlot.LecturerId">
+                        <option value="">-- Pick a lecturer --</option>
+                        @foreach (var lecturer in lecturers)
+                        {
+                            <option value="@lecturer.Id">@lecturer.Name</option>
+                        }
+                    </select>
                 </div>
+
+                <!-- Dropdown to pick a status - preselects current value -->
                 <div class="mb-3">
-                    <label for="starttime" class="form-label">StartTime:</label>
-                    <InputDate id="starttime" @bind-Value="ConsultationSlot.StartTime" class="form-control" />
-                    <ValidationMessage For="() => ConsultationSlot.StartTime" class="text-danger" />
+                    <label class="form-label">Status:</label>
+                    <select class="form-control" @bind="ConsultationSlot.StatusId">
+                        <option value="">-- Pick a status --</option>
+                        @foreach (var status in statuses)
+                        {
+                            <option value="@status.Id">@status.Name</option>
+                        }
+                    </select>
                 </div>
+
                 <div class="mb-3">
-                    <label for="endtime" class="form-label">EndTime:</label>
-                    <InputDate id="endtime" @bind-Value="ConsultationSlot.EndTime" class="form-control" />
-                    <ValidationMessage For="() => ConsultationSlot.EndTime" class="text-danger" />
+                    <label class="form-label">Start Time:</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="ConsultationSlot.StartTime" class="form-control" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="meetinglink" class="form-label">MeetingLink:</label>
-                    <InputText id="meetinglink" @bind-Value="ConsultationSlot.MeetingLink" class="form-control" />
-                    <ValidationMessage For="() => ConsultationSlot.MeetingLink" class="text-danger" />
+                    <label class="form-label">End Time:</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="ConsultationSlot.EndTime" class="form-control" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="isbooked" class="form-label">IsBooked:</label>
-                    <InputCheckbox id="isbooked" @bind-Value="ConsultationSlot.IsBooked" class="form-check-input" />
-                    <ValidationMessage For="() => ConsultationSlot.IsBooked" class="text-danger" />
+                    <label class="form-label">Meeting Link:</label>
+                    <InputText @bind-Value="ConsultationSlot.MeetingLink" class="form-control" />
                 </div>
+
                 <div class="mb-3">
-                    <label for="validfrom" class="form-label">ValidFrom:</label>
-                    <InputDate id="validfrom" @bind-Value="ConsultationSlot.ValidFrom" class="form-control" />
-                    <ValidationMessage For="() => ConsultationSlot.ValidFrom" class="text-danger" />
+                    <label class="form-label">Is Booked:</label>
+                    <InputCheckbox @bind-Value="ConsultationSlot.IsBooked" class="form-check-input" />
                 </div>
-                <div class="mb-3">
-                    <label for="validto" class="form-label">ValidTo:</label>
-                    <InputDate id="validto" @bind-Value="ConsultationSlot.ValidTo" class="form-control" />
-                    <ValidationMessage For="() => ConsultationSlot.ValidTo" class="text-danger" />
-                </div>
+
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
         </div>
@@ -73,28 +90,44 @@ else
 </div>
 
 @code {
+    // Id comes from the URL e.g. /consultationslots/edit?id=...
     [SupplyParameterFromQuery]
     private Guid Id { get; set; }
 
-    [SupplyParameterFromForm]
+    // The slot we are editing
     private ConsultationSlot? ConsultationSlot { get; set; }
+
+    // Lists for the dropdowns
+    private List<Course> courses = new();
+    private List<Lecturer> lecturers = new();
+    private List<Status> statuses = new();
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        ConsultationSlot ??= await context.ConsultationSlot.FirstOrDefaultAsync(m => m.Id == Id);
 
+        // Load the slot we want to edit
+        ConsultationSlot = await context.ConsultationSlot.FirstOrDefaultAsync(m => m.Id == Id);
+
+        // If slot not found, go to not found page
         if (ConsultationSlot is null)
         {
             NavigationManager.NotFound();
+            return;
         }
+
+        // Load dropdowns
+        courses = await context.Course.ToListAsync();
+        lecturers = await context.Lecturer.ToListAsync();
+        statuses = await context.Statuses.ToListAsync();
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // Runs when user clicks Save
     private async Task UpdateConsultationSlot()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Attach tells EF Core this object already exists in the database and needs updating
         context.Attach(ConsultationSlot!).State = EntityState.Modified;
 
         try
@@ -103,6 +136,7 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
+            // If slot was deleted by someone else while we were editing, go to not found
             if (!ConsultationSlotExists(ConsultationSlot!.Id))
             {
                 NavigationManager.NotFound();
@@ -116,6 +150,7 @@ else
         NavigationManager.NavigateTo("/consultationslots");
     }
 
+    // Checks if a slot with this id still exists in the database
     private bool ConsultationSlotExists(Guid id)
     {
         using var context = DbFactory.CreateDbContext();
