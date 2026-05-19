@@ -1,45 +1,63 @@
 @page "/courseselectors/create"
+@* Stay on the server, don't move to the browser *@
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Course Selector</PageTitle>
 
-<h1>Create</h1>
-
-<h2>CourseSelector</h2>
+<h1>Create Course Selector</h1>
 <hr />
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="CourseSelector" OnValidSubmit="AddCourseSelector" FormName="create" Enhance>
+        <EditForm Model="CourseSelector" OnValidSubmit="AddCourseSelector">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <!-- Dropdown to pick a course -->
             <div class="mb-3">
-                <label for="courseid" class="form-label">CourseId:</label>
-                <input id="courseid" type="text" @bind="CourseSelector.CourseId" class="form-control" />
-                <ValidationMessage For="() => CourseSelector.CourseId" class="text-danger" />
+                <label class="form-label">Select Course:</label>
+                <select class="form-control" @bind="CourseSelector.CourseId">
+                    <option value="">-- Pick a course --</option>
+                    @foreach (var course in courses)
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                </select>
             </div>
+
+            <!-- Dropdown to pick a lecturer -->
             <div class="mb-3">
-                <label for="lecturerid" class="form-label">LecturerId:</label>
-                <input id="lecturerid" type="text" @bind="CourseSelector.LecturerId" class="form-control" />
-                <ValidationMessage For="() => CourseSelector.LecturerId" class="text-danger" />
+                <label class="form-label">Select Lecturer:</label>
+                <select class="form-control" @bind="CourseSelector.LecturerId">
+                    <option value="">-- Pick a lecturer --</option>
+                    @foreach (var lecturer in lecturers)
+                    {
+                        <option value="@lecturer.Id">@lecturer.Name</option>
+                    }
+                </select>
             </div>
+
+            <!-- Dropdown to pick a student -->
             <div class="mb-3">
-                <label for="studentid" class="form-label">StudentId:</label>
-                <input id="studentid" type="text" @bind="CourseSelector.StudentId" class="form-control" />
-                <ValidationMessage For="() => CourseSelector.StudentId" class="text-danger" />
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="CourseSelector.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => CourseSelector.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="CourseSelector.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => CourseSelector.ValidTo" class="text-danger" /> 
-            </div>        
+                <label class="form-label">Select Student:</label>
+                <select class="form-control" @bind="CourseSelector.StudentId">
+                    <option value="">-- Pick a student --</option>
+                    @foreach (var student in students)
+                    {
+                        <option value="@student.Id">@student.Name</option>
+                    }
+                </select>
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -50,12 +68,28 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private CourseSelector CourseSelector { get; set; } = default!;
+    // The course selector object we are filling in
+    private CourseSelector CourseSelector { get; set; } = new();
 
-    protected override void OnInitialized() => CourseSelector ??= new();
+    // Lists for the dropdowns
+    private List<Course> courses = new();
+    private List<Lecturer> lecturers = new();
+    private List<Student> students = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // Error message shown if something goes wrong
+    private string? errorMessage;
+
+    // Runs when page loads - fills the dropdowns
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        courses = await context.Course.ToListAsync();
+        lecturers = await context.Lecturer.ToListAsync();
+        students = await context.Student.ToListAsync();
+    }
+
+    // Runs when user clicks Create
     private async Task AddCourseSelector()
     {
         using var context = DbFactory.CreateDbContext();
