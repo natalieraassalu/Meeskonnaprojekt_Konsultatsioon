@@ -1,16 +1,20 @@
-﻿@page "/mybookings"
-@* TODO: Once roles are done, filter by logged-in student's Id *@
+@page "/mybookings"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>My Bookings</PageTitle>
 
 <h1>My Bookings</h1>
 <hr />
 
-@if (bookings.Count == 0)
+@if (currentStudentId == Guid.Empty)
+{
+    <p>Please log in as a student to see your bookings.</p>
+}
+else if (bookings.Count == 0)
 {
     <p>No bookings yet.</p>
 }
@@ -50,6 +54,9 @@ else
     private List<BookingPage> bookings = new();
     private List<ConsultationSlot> slots = new();
 
+    // The logged-in student's User.Id, used to filter bookings.
+    private Guid currentStudentId = Guid.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -57,8 +64,24 @@ else
 
     private async Task LoadData()
     {
+        // Get the logged-in user's email from authentication state.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return;
+
         using var context = DbFactory.CreateDbContext();
-        bookings = await context.BookingPage.ToListAsync();
+
+        // Find the matching User record by email - this gives us the StudentId to filter by.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return;
+        currentStudentId = user.Id;
+
+        // Only load bookings that belong to the current student.
+        bookings = await context.BookingPage
+            .Where(b => b.StudentId == currentStudentId)
+            .ToListAsync();
+
+        // Load slots so we can show the time range for each booking.
         slots = await context.ConsultationSlot.ToListAsync();
     }
 
@@ -69,6 +92,7 @@ else
         var booking = await context.BookingPage.FirstOrDefaultAsync(b => b.Id == bookingId);
         if (booking is null) return;
 
+        // Free up the slot so other students can book it.
         var slot = await context.ConsultationSlot.FirstOrDefaultAsync(s => s.Id == booking.SlotId);
         if (slot != null)
         {
@@ -79,5 +103,27 @@ else
         context.BookingPage.Remove(booking);
         await context.SaveChangesAsync();
         await LoadData();
+    }
+
+    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    private async Task<string?> GetUserRoleAsync()
+    {
+        // Get the current authentication state to read the user's email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return null;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the matching User record by email.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return null;
+
+        // Look up the user's role by joining UserRole with Role.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name;
     }
 }

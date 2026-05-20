@@ -1,45 +1,82 @@
-﻿@page "/mycourses"
-@* TODO: Once roles are done, filter by logged-in lecturer's Id *@
+@page "/mycourses"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>My Courses</PageTitle>
 
-<h1>My Courses</h1>
-<p>Manage your courses and consultation slots.</p>
-<hr />
-
-@if (courses.Count == 0)
+@if (!isLecturer)
 {
-    <p>No courses yet. <a href="/courses/create">Create one here.</a></p>
+    <h1>Access denied</h1>
+    <p>This page is only available for lecturers.</p>
 }
 else
 {
-    <div class="row">
-        @foreach (var course in courses)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@course.Name</h5>
-                        <p class="card-text">@course.Details</p>
-                        <a href="/myslots/@course.Id" class="btn btn-primary">Manage Slots</a>
-                        <a href="/courses/edit?id=@course.Id" class="btn btn-secondary mt-2">Edit Course</a>
+    <h1>My Courses</h1>
+    <p>Manage your courses and consultation slots.</p>
+    <hr />
+
+    @if (courses.Count == 0)
+    {
+        <p>No courses yet. <a href="/courses/create">Create one here.</a></p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var course in courses)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@course.Name</h5>
+                            <p class="card-text">@course.Details</p>
+                            <a href="/myslots/@course.Id" class="btn btn-primary">Manage Slots</a>
+                            <a href="/courses/edit?id=@course.Id" class="btn btn-secondary mt-2">Edit Course</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 }
 
 @code {
     private List<Course> courses = new();
+    private bool isLecturer = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Only lecturers can see this page.
+        var role = await GetUserRoleAsync();
+        isLecturer = role == "Lecturer";
+        if (!isLecturer) return;
+
+        // Load courses (TODO later: filter to only this lecturer's courses).
         using var context = DbFactory.CreateDbContext();
         courses = await context.Course.ToListAsync();
+    }
+
+    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    private async Task<string?> GetUserRoleAsync()
+    {
+        // Get the current authentication state to read the user's email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return null;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the matching User record by email.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return null;
+
+        // Look up the user's role by joining UserRole with Role.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name;
     }
 }

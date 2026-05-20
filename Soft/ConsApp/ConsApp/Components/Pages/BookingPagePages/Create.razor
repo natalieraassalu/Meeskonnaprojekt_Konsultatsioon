@@ -14,42 +14,52 @@
     <div class="col-md-4">
         <EditForm method="post" Model="BookingPage" OnValidSubmit="AddBookingPage" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
+
+            @* Show error message if the chosen slot was already booked. *@
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
             <div class="mb-3">
-                <label for="slotid" class="form-label">SlotId:</label> 
-                <input id="slotid" @bind="BookingPage.SlotId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => BookingPage.SlotId" class="text-danger" /> 
-            </div>        
+                <label for="slotid" class="form-label">Slot:</label>
+                <InputSelect id="slotid" @bind-Value="BookingPage.SlotId" class="form-control">
+                    <option value="@Guid.Empty">-- select slot --</option>
+                    @* Loop through all consultation slots and show their time range. *@
+                    @foreach (var slot in slots)
+                    {
+                        <option value="@slot.Id">@slot.StartTime - @slot.EndTime</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => BookingPage.SlotId" class="text-danger" />
+            </div>
+
             <div class="mb-3">
-                <label for="studentid" class="form-label">StudentId:</label> 
-                <input id="studentid" @bind="BookingPage.StudentId" class="form-control" type="text" /> 
-                <ValidationMessage For="() => BookingPage.StudentId" class="text-danger" /> 
-            </div>        
+                <label for="studentid" class="form-label">Student:</label>
+                <InputSelect id="studentid" @bind-Value="BookingPage.StudentId" class="form-control">
+                    <option value="@Guid.Empty">-- select student --</option>
+                    @* Loop through all users and show their name. *@
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => BookingPage.StudentId" class="text-danger" />
+            </div>
+
             <div class="mb-3">
-                <label for="bookingdate" class="form-label">BookingDate:</label> 
-                <InputDate id="bookingdate" @bind-Value="BookingPage.BookingDate" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.BookingDate" class="text-danger" /> 
-            </div>        
+                <label for="bookingdate" class="form-label">BookingDate:</label>
+                <InputDate id="bookingdate" @bind-Value="BookingPage.BookingDate" class="form-control" />
+                <ValidationMessage For="() => BookingPage.BookingDate" class="text-danger" />
+            </div>
+
             <div class="mb-3">
-                <label for="note" class="form-label">Note:</label> 
-                <InputText id="note" @bind-Value="BookingPage.Note" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.Note" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="BookingPage.Status" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.Status" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validfrom" class="form-label">ValidFrom:</label> 
-                <InputDate id="validfrom" @bind-Value="BookingPage.ValidFrom" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.ValidFrom" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="validto" class="form-label">ValidTo:</label> 
-                <InputDate id="validto" @bind-Value="BookingPage.ValidTo" class="form-control" /> 
-                <ValidationMessage For="() => BookingPage.ValidTo" class="text-danger" /> 
-            </div>        
+                <label for="note" class="form-label">Note:</label>
+                <InputText id="note" @bind-Value="BookingPage.Note" class="form-control" />
+                <ValidationMessage For="() => BookingPage.Note" class="text-danger" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -61,16 +71,48 @@
 
 @code {
     [SupplyParameterFromForm]
-    private BookingPage BookingPage { get; set; } = default!;
+    private BookingPage BookingPage { get; set; } = new();
 
-    protected override void OnInitialized() => BookingPage ??= new();
+    // Lists used to fill the dropdowns.
+    private List<ConsultationSlot> slots = [];
+    private List<User> users = [];
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // Error message shown when the chosen slot is already booked.
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        BookingPage ??= new();
+
+        // Load all slots and users from the database for the dropdowns.
+        using var context = DbFactory.CreateDbContext();
+        slots = await context.ConsultationSlot.ToListAsync();
+        users = await context.User.ToListAsync();
+    }
+
     private async Task AddBookingPage()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Find the chosen slot in the database.
+        var slot = await context.ConsultationSlot.FindAsync(BookingPage.SlotId);
+
+        // If the slot does not exist or is already booked, show an error.
+        if (slot is null || slot.IsBooked)
+        {
+            errorMessage = "This slot is already booked. Please choose another one.";
+
+            // Reload the dropdown lists so the form can be re-rendered.
+            slots = await context.ConsultationSlot.ToListAsync();
+            users = await context.User.ToListAsync();
+            return;
+        }
+
+        // Mark the slot as booked and save the new booking.
+        slot.IsBooked = true;
         context.BookingPage.Add(BookingPage);
         await context.SaveChangesAsync();
+
         NavigationManager.NavigateTo("/bookingpages");
     }
 }

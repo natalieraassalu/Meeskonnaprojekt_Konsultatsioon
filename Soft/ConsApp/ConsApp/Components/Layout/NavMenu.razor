@@ -1,0 +1,189 @@
+@implements IDisposable
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Consultation App</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+
+        <AuthorizeView>
+            <NotAuthorized>
+                @* Visitor who is not logged in: just Home, Register, Login. *@
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Register">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+
+            <Authorized>
+                @* Student sees Home and My Bookings. *@
+                @if (role == "Student")
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="mybookings">
+                            <span class="bi bi-calendar-check-nav-menu" aria-hidden="true"></span> My Bookings
+                        </NavLink>
+                    </div>
+                }
+
+                @* Lecturer sees My Courses, Consultation Slots, Course Selectors. *@
+                else if (role == "Lecturer")
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="mycourses">
+                            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> My Courses
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="consultationslots">
+                            <span class="bi bi-clock-nav-menu" aria-hidden="true"></span> Consultation Slots
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="courseselectors">
+                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selectors
+                        </NavLink>
+                    </div>
+                }
+
+                @* Admin (logged in but no role / unknown role) sees everything. *@
+                else
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="bookingpages">
+                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> Bookings
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="consultationslots">
+                            <span class="bi bi-clock-nav-menu" aria-hidden="true"></span> Consultation Slots
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="courseselectors">
+                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selectors
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="course-materials">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Course Materials
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="materials">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Materials
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="users">
+                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Users
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="roles">
+                            <span class="bi bi-shield-nav-menu" aria-hidden="true"></span> Roles
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="userroles">
+                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> User Roles
+                        </NavLink>
+                    </div>
+                }
+
+                @* Account/logout (same for all logged-in users). *@
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private string? currentUrl;
+
+    // The logged-in user's role name ("Student", "Lecturer", or null for admin/unknown).
+    private string? role;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Track the current URL for the logout return path.
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        // Look up the role once on load - decides which links to show.
+        role = await GetUserRoleAsync();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    private async Task<string?> GetUserRoleAsync()
+    {
+        // Get the current authentication state to read the user's email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return null;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the matching User record by email.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return null;
+
+        // Look up the user's role by joining UserRole with Role.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name;
+    }
+}

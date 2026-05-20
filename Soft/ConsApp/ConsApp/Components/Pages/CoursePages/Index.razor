@@ -2,14 +2,19 @@
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Courses</PageTitle>
 
 <h1>Courses</h1>
 
-<p>
-    <a href="courses/create">Create New</a>
-</p>
+@* Only lecturers can create new courses - hide the link for students. *@
+@if (isLecturer)
+{
+    <p>
+        <a href="courses/create">Create New</a>
+    </p>
+}
 
 <table class="table">
     <thead>
@@ -44,9 +49,39 @@
 @code {
     private List<Course> courses = new();
 
+    // True only when the logged-in user has the "Lecturer" role.
+    private bool isLecturer = false;
+
     protected override async Task OnInitializedAsync()
     {
+        // Check the role first so the UI knows whether to show "Create New".
+        var role = await GetUserRoleAsync();
+        isLecturer = role == "Lecturer";
+
+        // Load the list of courses to display.
         using var context = DbFactory.CreateDbContext();
         courses = await context.Course.ToListAsync();
+    }
+
+    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    private async Task<string?> GetUserRoleAsync()
+    {
+        // Get the current authentication state to read the user's email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return null;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the matching User record by email.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return null;
+
+        // Look up the user's role by joining UserRole with Role.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name;
     }
 }

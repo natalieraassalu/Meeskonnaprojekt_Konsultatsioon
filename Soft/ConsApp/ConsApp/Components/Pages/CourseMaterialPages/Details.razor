@@ -1,5 +1,55 @@
-﻿<h3>Details</h3>
+@page "/course-materials/details"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Course Material Details</PageTitle>
+
+<h1>Course Material Details</h1>
+<hr />
+
+@if (courseMaterial is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @* Show the course and material names read-only. *@
+    <dl class="row">
+        <dt class="col-sm-2">Course</dt>
+        <dd class="col-sm-10">@(courseName ?? "(unknown)")</dd>
+
+        <dt class="col-sm-2">Material</dt>
+        <dd class="col-sm-10">@(materialName ?? "(unknown)")</dd>
+    </dl>
+
+    <a href="@($"/course-materials/edit?id={courseMaterial.Id}")" class="btn btn-primary">Edit</a>
+    <a href="/course-materials" class="btn btn-secondary">Back to List</a>
+}
 
 @code {
+    // The course material Id comes from the URL like /course-materials/details?id=...
+    [SupplyParameterFromQuery] public Guid Id { get; set; }
 
+    // The course material we are showing.
+    private CourseMaterial? courseMaterial;
+
+    // Names looked up for display.
+    private string? courseName;
+    private string? materialName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Load the course material from the database.
+        courseMaterial = await context.CourseMaterial.FirstOrDefaultAsync(cm => cm.Id == Id);
+        if (courseMaterial is null) return;
+
+        // Look up the names of the linked course and material.
+        var course = await context.Course.FirstOrDefaultAsync(c => c.Id == courseMaterial.CourseId);
+        var material = await context.Material.FirstOrDefaultAsync(m => m.Id == courseMaterial.MaterialId);
+        courseName = course?.Name;
+        materialName = material?.Name;
+    }
 }

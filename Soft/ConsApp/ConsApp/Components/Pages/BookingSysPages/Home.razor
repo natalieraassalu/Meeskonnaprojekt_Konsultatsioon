@@ -1,18 +1,24 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Courses</PageTitle>
 
-<h1>Available Courses</h1>
-<p>Click a course to view consultation slots.</p>
+<h1>My Courses</h1>
+<p>Courses you are enrolled in. Click one to view consultation slots.</p>
 <hr />
 
-@if (courses.Count == 0)
+@if (notEnrolled)
 {
-    <p>No courses available yet.</p>
+    <p>You are not enrolled in any courses yet.</p>
+}
+else if (courses.Count == 0)
+{
+    <p>Loading...</p>
 }
 else
 {
@@ -35,9 +41,75 @@ else
 @code {
     private List<Course> courses = new();
 
+    // True when the logged-in student has no CourseSelector rows.
+    private bool notEnrolled = false;
+
     protected override async Task OnInitializedAsync()
     {
+        // Check the role of the logged-in user.
+        var role = await GetUserRoleAsync();
+
+        // Lecturers don't see student course cards - send them to their own page.
+        if (role == "Lecturer")
+        {
+            NavigationManager.NavigateTo("/mycourses");
+            return;
+        }
+
+        // Find the logged-in student's User record by email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email))
+        {
+            notEnrolled = true;
+            return;
+        }
+
         using var context = DbFactory.CreateDbContext();
-        courses = await context.Course.ToListAsync();
+        var student = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (student is null)
+        {
+            notEnrolled = true;
+            return;
+        }
+
+        // Get the list of CourseIds the student is enrolled in via CourseSelector.
+        var enrolledCourseIds = await context.CourseSelector
+            .Where(cs => cs.StudentId == student.Id)
+            .Select(cs => cs.CourseId)
+            .ToListAsync();
+
+        if (enrolledCourseIds.Count == 0)
+        {
+            notEnrolled = true;
+            return;
+        }
+
+        // Load only the courses the student is enrolled in.
+        courses = await context.Course
+            .Where(c => enrolledCourseIds.Contains(c.Id))
+            .ToListAsync();
+    }
+
+    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    private async Task<string?> GetUserRoleAsync()
+    {
+        // Get the current authentication state to read the user's email.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return null;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Find the matching User record by email.
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return null;
+
+        // Look up the user's role by joining UserRole with Role.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name;
     }
 }

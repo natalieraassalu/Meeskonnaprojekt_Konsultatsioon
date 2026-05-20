@@ -4,6 +4,7 @@
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>@(course?.Name ?? "Course")</PageTitle>
 
@@ -103,6 +104,21 @@ else
 
         using var context = DbFactory.CreateDbContext();
 
+        // Get the logged-in user's email from the authentication state.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+
+        // Find the matching User record by email so we can set StudentId.
+        var student = string.IsNullOrEmpty(email)
+            ? null
+            : await context.User.FirstOrDefaultAsync(u => u.Email == email);
+
+        if (student is null)
+        {
+            errorMessage = "Please complete your profile first";
+            return;
+        }
+
         var slot = await context.ConsultationSlot.FirstOrDefaultAsync(s => s.Id == slotId);
 
         if (slot is null) { errorMessage = "Slot not found."; return; }
@@ -114,6 +130,8 @@ else
         var booking = new BookingPage
         {
             SlotId = slotId,
+            // Tie the booking to the logged-in student so the FK is satisfied.
+            StudentId = student.Id,
             BookingDate = DateTime.Now,
             Note = string.Empty
         };

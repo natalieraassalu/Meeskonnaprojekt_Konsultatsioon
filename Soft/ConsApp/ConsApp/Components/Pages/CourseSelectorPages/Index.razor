@@ -14,27 +14,24 @@
 <table class="table">
     <thead>
         <tr>
-            <th>CourseId</th>
-            <th>LecturerId</th>
-            <th>StudentId</th>
-            <th>ValidFrom</th>
-            <th>ValidTo</th>
+            <th>Course</th>
+            <th>Lecturer</th>
+            <th>Student</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var courseselector in courseselectors)
+        @foreach (var cs in courseselectors)
         {
             <tr>
-                <td>@courseselector.CourseId</td>
-                <td>@courseselector.LecturerId</td>
-                <td>@courseselector.StudentId</td>
-                <td>@courseselector.ValidFrom</td>
-                <td>@courseselector.ValidTo</td>
+                @* Look up each related row by Id and show the Name. *@
+                <td>@(courses.FirstOrDefault(c => c.Id == cs.CourseId)?.Name ?? "(unknown)")</td>
+                <td>@(users.FirstOrDefault(u => u.Id == cs.LecturerId)?.Name ?? "(unknown)")</td>
+                <td>@(users.FirstOrDefault(u => u.Id == cs.StudentId)?.Name ?? "(unknown)")</td>
                 <td>
-                    <a href="@($"courseselectors/edit?id={courseselector.Id}")">Edit</a> |
-                    <a href="@($"courseselectors/details?id={courseselector.Id}")">Details</a> |
-                    <a href="@($"courseselectors/delete?id={courseselector.Id}")">Delete</a>
+                    <a href="@($"courseselectors/edit?id={cs.Id}")">Edit</a> |
+                    <a href="@($"courseselectors/details?id={cs.Id}")">Details</a> |
+                    <a href="@($"courseselectors/delete?id={cs.Id}")">Delete</a>
                 </td>
             </tr>
         }
@@ -44,9 +41,17 @@
 @code {
     private List<CourseSelector> courseselectors = new();
 
+    // Loaded once so we can resolve Guids to names without one query per row.
+    private List<Course> courses = new();
+    private List<User> users = new();
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
+
+        // Load the course selectors plus the lookup data for names.
         courseselectors = await context.CourseSelector.ToListAsync();
+        courses = await context.Course.ToListAsync();
+        users = await context.User.ToListAsync();
     }
 }

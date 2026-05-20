@@ -1,5 +1,68 @@
-﻿<h3>Delete</h3>
+@page "/course-materials/delete"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Course Material</PageTitle>
+
+<h1>Delete Course Material</h1>
+<h3>Are you sure you want to delete this course material?</h3>
+<hr />
+
+@if (courseMaterial is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @* Show the course and material names so the user can confirm what they're deleting. *@
+    <dl class="row">
+        <dt class="col-sm-2">Course</dt>
+        <dd class="col-sm-10">@(courseName ?? "(unknown)")</dd>
+
+        <dt class="col-sm-2">Material</dt>
+        <dd class="col-sm-10">@(materialName ?? "(unknown)")</dd>
+    </dl>
+
+    <button class="btn btn-danger" @onclick="DeleteCourseMaterial">Delete</button>
+    <a href="/course-materials" class="btn btn-secondary">Cancel</a>
+}
 
 @code {
+    // The course material Id comes from the URL like /course-materials/delete?id=...
+    [SupplyParameterFromQuery] public Guid Id { get; set; }
 
+    // The course material we are about to delete.
+    private CourseMaterial? courseMaterial;
+
+    // Names looked up for display.
+    private string? courseName;
+    private string? materialName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Load the course material from the database.
+        courseMaterial = await context.CourseMaterial.FirstOrDefaultAsync(cm => cm.Id == Id);
+        if (courseMaterial is null) return;
+
+        // Look up the names of the linked course and material to display them.
+        var course = await context.Course.FirstOrDefaultAsync(c => c.Id == courseMaterial.CourseId);
+        var material = await context.Material.FirstOrDefaultAsync(m => m.Id == courseMaterial.MaterialId);
+        courseName = course?.Name;
+        materialName = material?.Name;
+    }
+
+    private async Task DeleteCourseMaterial()
+    {
+        if (courseMaterial is null) return;
+
+        // Remove the course material from the database.
+        using var context = DbFactory.CreateDbContext();
+        context.CourseMaterial.Remove(courseMaterial);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/course-materials");
+    }
 }

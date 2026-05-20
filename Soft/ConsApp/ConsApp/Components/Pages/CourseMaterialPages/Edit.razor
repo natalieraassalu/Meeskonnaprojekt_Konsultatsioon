@@ -1,5 +1,91 @@
-﻿<h3>Edit</h3>
+@page "/course-materials/edit"
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Course Material</PageTitle>
+
+<h1>Edit Course Material</h1>
+<hr />
+
+@if (courseMaterial is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="courseMaterial" OnValidSubmit="UpdateCourseMaterial">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="mb-3">
+                    <label class="form-label">Course:</label>
+                    <InputSelect @bind-Value="courseMaterial.CourseId" class="form-control">
+                        <option value="">-- select course --</option>
+                        @* Loop through all courses and show their name. *@
+                        @foreach (var course in courses)
+                        {
+                            <option value="@course.Id">@course.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Material:</label>
+                    <InputSelect @bind-Value="courseMaterial.MaterialId" class="form-control">
+                        <option value="">-- select material --</option>
+                        @* Loop through all materials and show their name. *@
+                        @foreach (var material in materials)
+                        {
+                            <option value="@material.Id">@material.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/course-materials">Back to List</a>
+</div>
 
 @code {
+    // The course material Id comes from the URL like /course-materials/edit?id=...
+    [SupplyParameterFromQuery] public Guid Id { get; set; }
 
+    // The course material we are editing.
+    private CourseMaterial? courseMaterial;
+
+    // Lists used to fill the dropdowns.
+    private List<Course> courses = new();
+    private List<Material> materials = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Load the course material to edit.
+        courseMaterial = await context.CourseMaterial.FirstOrDefaultAsync(cm => cm.Id == Id);
+
+        // Load all courses and materials for the dropdowns.
+        courses = await context.Course.ToListAsync();
+        materials = await context.Material.ToListAsync();
+    }
+
+    private async Task UpdateCourseMaterial()
+    {
+        if (courseMaterial is null) return;
+
+        // Save the changes back to the database.
+        using var context = DbFactory.CreateDbContext();
+        context.CourseMaterial.Update(courseMaterial);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/course-materials");
+    }
 }
