@@ -1,0 +1,83 @@
+﻿@page "/mybookings"
+@* TODO: Once roles are done, filter by logged-in student's Id *@
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>My Bookings</PageTitle>
+
+<h1>My Bookings</h1>
+<hr />
+
+@if (bookings.Count == 0)
+{
+    <p>No bookings yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Slot</th>
+                <th>Booking Date</th>
+                <th>Note</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in bookings)
+            {
+                var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
+                <tr>
+                    <td>@(slot != null ? $"{slot.StartTime:g} - {slot.EndTime:g}" : "Unknown")</td>
+                    <td>@booking.BookingDate.ToString("g")</td>
+                    <td>@booking.Note</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => CancelBooking(booking.Id)">Cancel</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="mt-3">
+    <a href="/" class="btn btn-secondary">Back to Courses</a>
+</div>
+
+@code {
+    private List<BookingPage> bookings = new();
+    private List<ConsultationSlot> slots = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        using var context = DbFactory.CreateDbContext();
+        bookings = await context.BookingPage.ToListAsync();
+        slots = await context.ConsultationSlot.ToListAsync();
+    }
+
+    private async Task CancelBooking(Guid bookingId)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var booking = await context.BookingPage.FirstOrDefaultAsync(b => b.Id == bookingId);
+        if (booking is null) return;
+
+        var slot = await context.ConsultationSlot.FirstOrDefaultAsync(s => s.Id == booking.SlotId);
+        if (slot != null)
+        {
+            slot.IsBooked = false;
+            context.ConsultationSlot.Update(slot);
+        }
+
+        context.BookingPage.Remove(booking);
+        await context.SaveChangesAsync();
+        await LoadData();
+    }
+}

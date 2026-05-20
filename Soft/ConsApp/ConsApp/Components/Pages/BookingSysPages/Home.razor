@@ -1,0 +1,43 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Abc.Data.Consultation
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Courses</PageTitle>
+
+<h1>Available Courses</h1>
+<p>Click a course to view consultation slots.</p>
+<hr />
+
+@if (courses.Count == 0)
+{
+    <p>No courses available yet.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var course in courses)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@course.Name</h5>
+                        <p class="card-text">@course.Details</p>
+                        <a href="/courses/@course.Id" class="btn btn-primary">View Slots</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Course> courses = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courses = await context.Course.ToListAsync();
+    }
+}
