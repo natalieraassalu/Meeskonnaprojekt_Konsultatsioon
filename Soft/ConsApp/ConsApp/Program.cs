@@ -63,8 +63,7 @@ using (var scope = app.Services.CreateScope())
     using var context = dbFactory.CreateDbContext();
 
     // Add "Lecturer" role if missing.
-    if (!context.Role.Any(r => r.Name == "Lecturer"))
-    {
+     {
         context.Role.Add(new Abc.Data.Consultation.Role { Name = "Lecturer" });
     }
 
