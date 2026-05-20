@@ -56,6 +56,27 @@ builder.Services.AddScoped<IUserRolesRepo, UserRolesRepo>();
 
 var app = builder.Build();
 
+// Seed the two roles ("Lecturer" and "Student") on startup if they don't already exist.
+using (var scope = app.Services.CreateScope())
+{
+    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ConsApp.Data.ApplicationDbContext>>();
+    using var context = dbFactory.CreateDbContext();
+
+    // Add "Lecturer" role if missing.
+    if (!context.Role.Any(r => r.Name == "Lecturer"))
+    {
+        context.Role.Add(new Abc.Data.Consultation.Role { Name = "Lecturer" });
+    }
+
+    // Add "Student" role if missing.
+    if (!context.Role.Any(r => r.Name == "Student"))
+    {
+        context.Role.Add(new Abc.Data.Consultation.Role { Name = "Student" });
+    }
+
+    context.SaveChanges();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

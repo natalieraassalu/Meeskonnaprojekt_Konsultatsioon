@@ -1,11 +1,13 @@
-﻿@page "/Account/Register"
+@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
 @using ConsApp.Data
+@using Abc.Data.Consultation
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -14,6 +16,7 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 
 <PageTitle>Register</PageTitle>
 
@@ -42,6 +45,17 @@
                 <label for="Input.ConfirmPassword">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+
+            @* Role dropdown - the user picks whether they're a Student or Lecturer. *@
+            <div class="form-floating mb-3">
+                <InputSelect @bind-Value="Input.Role" id="Input.Role" class="form-control">
+                    <option value="Student">Student</option>
+                    <option value="Lecturer">Lecturer</option>
+                </InputSelect>
+                <label for="Input.Role">Role</label>
+                <ValidationMessage For="() => Input.Role" class="text-danger" />
+            </div>
+
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
@@ -86,6 +100,33 @@
         }
 
         Logger.LogInformation("User created a new account with password.");
+
+        // Identity user is created - now create the matching domain User and UserRole records
+        // so the app can look up the user's role by email later.
+        using (var context = DbFactory.CreateDbContext())
+        {
+            // Add a User row with name and email taken from the registration form.
+            var domainUser = new Abc.Data.Consultation.User
+            {
+                Name = Input.Email,
+                Email = Input.Email
+            };
+            context.User.Add(domainUser);
+
+            // Find the role the user picked (Student or Lecturer).
+            var role = await context.Role.FirstOrDefaultAsync(r => r.Name == Input.Role);
+            if (role is not null)
+            {
+                // Link the new user to the chosen role.
+                context.UserRole.Add(new UserRole
+                {
+                    UserId = domainUser.Id,
+                    RoleId = role.Id
+                });
+            }
+
+            await context.SaveChangesAsync();
+        }
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -148,5 +189,10 @@
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+
+        // Role the user picked at registration ("Student" or "Lecturer").
+        [Required]
+        [Display(Name = "Role")]
+        public string Role { get; set; } = "Student";
     }
 }
