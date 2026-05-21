@@ -12,9 +12,9 @@ public sealed class Course : NamedEntity
     [Random(20, 100)]
     public string Details { get; set; } = "";
 
-    public DateTime ValidFrom { get; set; }
+    public DateTime StartOfCourse { get; set; }
 
-    public DateTime ValidTo { get; set; }
+    public DateTime EndOfCourse { get; set; }
 
     public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
 

@@ -22,8 +22,8 @@
             <th>Name</th>
             <th>Code</th>
             <th>Details</th>
-            <th>ValidFrom</th>
-            <th>ValidTo</th>
+            <th>Start of Course</th>
+            <th>End of Course</th>
             <th></th>
         </tr>
     </thead>
@@ -34,8 +34,8 @@
                 <td>@course.Name</td>
                 <td>@course.Code</td>
                 <td>@course.Details</td>
-                <td>@course.ValidFrom.ToShortDateString()</td>
-                <td>@course.ValidTo.ToShortDateString()</td>
+                <td>@course.StartOfCourse.ToShortDateString()</td>
+                <td>@course.EndOfCourse.ToShortDateString()</td>
                 <td>
                     <a href="@($"courses/edit?id={course.Id}")">Edit</a> |
                     <a href="@($"courses/details?id={course.Id}")">Details</a> |

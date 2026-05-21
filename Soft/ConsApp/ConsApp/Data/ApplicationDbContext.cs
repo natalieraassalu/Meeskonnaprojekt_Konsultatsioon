@@ -29,8 +29,6 @@ namespace ConsApp.Data
 
             builder.Entity<Abc.Data.Consultation.Course>().Ignore(e => e.Timestamp);
             builder.Entity<Abc.Data.Consultation.Material>().Ignore(e => e.Timestamp);
-            builder.Entity<Abc.Data.Consultation.Material>().Ignore(e => e.Number);
-            builder.Entity<Abc.Data.Consultation.Material>().Ignore(e => e.Author);
             builder.Entity<Abc.Data.Consultation.CourseMaterial>().Ignore(e => e.Timestamp);
         }
     }

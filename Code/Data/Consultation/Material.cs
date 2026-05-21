@@ -6,6 +6,7 @@ namespace Abc.Data.Consultation;
 
 public sealed class Material : NamedEntity
 {
+    public string Name { get; set; } = "";
     [Random(3, 5, "0123456789")] public string Number { get; set; } = "";
 
     [Random(10, 30)] public string Author { get; set; } = "";

@@ -30,6 +30,16 @@
                 <InputText @bind-Value="Course.Details" class="form-control" />
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Start of Course:</label>
+                <InputDate @bind-Value="Course.StartOfCourse" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">End of Course:</label>
+                <InputDate @bind-Value="Course.EndOfCourse" class="form-control" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>

@@ -25,11 +25,11 @@ else
         <dt class="col-sm-2">Details</dt>
         <dd class="col-sm-10">@course.Details</dd>
 
-        <dt class="col-sm-2">ValidFrom</dt>
-        <dd class="col-sm-10">@course.ValidFrom.ToShortDateString()</dd>
+        <dt class="col-sm-2">Start of Course</dt>
+        <dd class="col-sm-10">@course.StartOfCourse.ToShortDateString()</dd>
 
-        <dt class="col-sm-2">ValidTo</dt>
-        <dd class="col-sm-10">@course.ValidTo.ToShortDateString()</dd>
+        <dt class="col-sm-2">End of Course</dt>
+        <dd class="col-sm-10">@course.EndOfCourse.ToShortDateString()</dd>
     </dl>
 
     <a href="@($"/courses/edit?id={course.Id}")" class="btn btn-primary">Edit</a>
