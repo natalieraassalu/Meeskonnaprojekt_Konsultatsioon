@@ -8,14 +8,14 @@
 <h1>Course Materials</h1>
 
 <p>
-    <a href="course-materials/create">Create New</a>
+    <a href="coursematerials/create">Create New</a>
 </p>
 
 <table class="table">
     <thead>
         <tr>
-            <th>CourseId</th>
-            <th>MaterialId</th>
+            <th>Course</th>
+            <th>Material</th>
             <th></th>
         </tr>
     </thead>
@@ -23,12 +23,12 @@
         @foreach (var cm in courseMaterials)
         {
             <tr>
-                <td>@cm.CourseId</td>
-                <td>@cm.MaterialId</td>
+                <td>@cm.Course?.Name</td>
+                <td>@cm.Material?.Name</td>
                 <td>
-                    <a href="@($"course-materials/edit?id={cm.Id}")">Edit</a> |
-                    <a href="@($"course-materials/details?id={cm.Id}")">Details</a> |
-                    <a href="@($"course-materials/delete?id={cm.Id}")">Delete</a>
+                    <a href="@($"coursematerials/edit?id={cm.Id}")">Edit</a> |
+                    <a href="@($"coursematerials/details?id={cm.Id}")">Details</a> |
+                    <a href="@($"coursematerials/delete?id={cm.Id}")">Delete</a>
                 </td>
             </tr>
         }
@@ -41,6 +41,6 @@
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        courseMaterials = await context.CourseMaterial.ToListAsync();
+        courseMaterials = await context.CourseMaterial.Include(cm => cm.Course).Include(cm => cm.Material).ToListAsync();
     }
 }

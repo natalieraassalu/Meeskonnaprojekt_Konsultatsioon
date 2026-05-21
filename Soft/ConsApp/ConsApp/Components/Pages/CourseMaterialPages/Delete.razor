@@ -26,7 +26,7 @@ else
     </dl>
 
     <button class="btn btn-danger" @onclick="DeleteCourseMaterial">Delete</button>
-    <a href="/course-materials" class="btn btn-secondary">Cancel</a>
+    <a href="/coursematerials" class="btn btn-secondary">Cancel</a>
 }
 
 @code {
@@ -63,6 +63,6 @@ else
         using var context = DbFactory.CreateDbContext();
         context.CourseMaterial.Remove(courseMaterial);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/course-materials");
+        NavigationManager.NavigateTo("/coursematerials");
     }
 }
