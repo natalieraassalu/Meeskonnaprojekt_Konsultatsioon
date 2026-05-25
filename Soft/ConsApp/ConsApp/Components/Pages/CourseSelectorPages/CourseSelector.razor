@@ -1,0 +1,239 @@
+@page "/courseselector"
+@namespace ConsApp.Components.Pages
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using CourseEntity = Abc.Data.Consultation.Course
+@using CourseSelectorEntity = Abc.Data.Consultation.CourseSelector
+@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Course Selector</PageTitle>
+
+<h1>Course Selector</h1>
+<p>Choose the courses you want to follow.</p>
+<hr />
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <div class="@statusCss" role="alert">@statusMessage</div>
+}
+
+@if (currentStudentId == Guid.Empty)
+{
+    <p>Please log in as a student to select courses.</p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="courseSelector" class="form-label fw-semibold">@ProgramLabel</label>
+        <InputSelect id="courseSelector" class="form-select" @bind-Value="selectedCourseId">
+            <option value="@Guid.Empty">-- select course --</option>
+            @foreach (var course in courses)
+            {
+                <option value="@course.Id">@GetCourseLabel(course)</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="button" class="btn btn-primary" @onclick="AddSelectedCourse">Add Course</button>
+
+    <section class="mt-4">
+        <h2 class="h4">Already Selected Courses</h2>
+
+        @if (selectedCourses.Count == 0)
+        {
+            <p>No courses selected yet.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var course in selectedCourses)
+                {
+                    <li class="list-group-item">@GetCourseLabel(course)</li>
+                }
+            </ul>
+        }
+    </section>
+}
+
+@code {
+    private const string ProgramLabel = "Äriinfotehnoloogia (IABB17):";
+
+    private static readonly string[] InitialCourseCodes =
+    [
+        "IABB21",
+        "IABB22",
+        "IABB41",
+        "IABB42",
+        "IABB61",
+        "IABB62",
+        "IABB63"
+    ];
+
+    private readonly DateTime defaultStartDate = new(2026, 9, 1);
+    private readonly DateTime defaultEndDate = new(2027, 1, 31);
+
+    private List<CourseEntity> courses = new();
+    private List<CourseEntity> selectedCourses = new();
+    private Guid currentStudentId = Guid.Empty;
+    private Guid selectedCourseId = Guid.Empty;
+    private string statusMessage = string.Empty;
+    private string statusCss = "alert alert-info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        currentStudentId = await GetCurrentStudentIdAsync(context);
+        if (currentStudentId == Guid.Empty)
+        {
+            return;
+        }
+
+        await EnsureInitialCoursesAsync(context);
+        await LoadCoursesAsync(context);
+        await LoadSelectedCoursesAsync(context);
+    }
+
+    private async Task<Guid> GetCurrentStudentIdAsync(ConsApp.Data.ApplicationDbContext context)
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email))
+        {
+            return Guid.Empty;
+        }
+
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null)
+        {
+            return Guid.Empty;
+        }
+
+        var roleName = await context.UserRole
+            .Where(ur => ur.UserId == user.Id)
+            .Select(ur => ur.Role!.Name)
+            .FirstOrDefaultAsync();
+
+        return roleName == "Student" ? user.Id : Guid.Empty;
+    }
+
+    private async Task EnsureInitialCoursesAsync(ConsApp.Data.ApplicationDbContext context)
+    {
+        var existingCodes = await context.Course
+            .Where(c => InitialCourseCodes.Contains(c.Code))
+            .Select(c => c.Code)
+            .ToListAsync();
+
+        foreach (var code in InitialCourseCodes.Except(existingCodes))
+        {
+            context.Course.Add(new CourseEntity
+            {
+                Name = code,
+                Code = code,
+                Details = ProgramLabel,
+                StartOfCourse = defaultStartDate,
+                EndOfCourse = defaultEndDate
+            });
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    private async Task LoadCoursesAsync(ConsApp.Data.ApplicationDbContext context)
+    {
+        courses = await context.Course
+            .OrderBy(c => c.Code)
+            .ThenBy(c => c.Name)
+            .ToListAsync();
+    }
+
+    private async Task LoadSelectedCoursesAsync(ConsApp.Data.ApplicationDbContext context)
+    {
+        var selectedCourseIds = await context.CourseSelector
+            .Where(cs => cs.StudentId == currentStudentId)
+            .Select(cs => cs.CourseId)
+            .Distinct()
+            .ToListAsync();
+
+        selectedCourses = await context.Course
+            .Where(c => selectedCourseIds.Contains(c.Id))
+            .OrderBy(c => c.Code)
+            .ThenBy(c => c.Name)
+            .ToListAsync();
+    }
+
+    private async Task AddSelectedCourse()
+    {
+        statusMessage = string.Empty;
+
+        if (selectedCourseId == Guid.Empty)
+        {
+            SetStatus("Please choose a course first.", false);
+            return;
+        }
+
+        using var context = DbFactory.CreateDbContext();
+
+        var alreadySelected = await context.CourseSelector
+            .AnyAsync(cs => cs.StudentId == currentStudentId && cs.CourseId == selectedCourseId);
+        if (alreadySelected)
+        {
+            SetStatus("This course is already in your selected courses.", false);
+            return;
+        }
+
+        var lecturerId = await GetLecturerIdForCourseAsync(context, selectedCourseId);
+        if (lecturerId == Guid.Empty)
+        {
+            SetStatus("No lecturer is available for this course yet.", false);
+            return;
+        }
+
+        context.CourseSelector.Add(new CourseSelectorEntity
+        {
+            CourseId = selectedCourseId,
+            LecturerId = lecturerId,
+            StudentId = currentStudentId
+        });
+
+        await context.SaveChangesAsync();
+        await LoadSelectedCoursesAsync(context);
+
+        selectedCourseId = Guid.Empty;
+        SetStatus("Course selected.", true);
+    }
+
+    private static async Task<Guid> GetLecturerIdForCourseAsync(ConsApp.Data.ApplicationDbContext context, Guid courseId)
+    {
+        var existingLecturerId = await context.CourseSelector
+            .Where(cs => cs.CourseId == courseId)
+            .Select(cs => cs.LecturerId)
+            .FirstOrDefaultAsync();
+
+        if (existingLecturerId != Guid.Empty)
+        {
+            return existingLecturerId;
+        }
+
+        return await (
+            from user in context.User
+            join userRole in context.UserRole on user.Id equals userRole.UserId
+            join role in context.Role on userRole.RoleId equals role.Id
+            where role.Name == "Lecturer"
+            select user.Id).FirstOrDefaultAsync();
+    }
+
+    private static string GetCourseLabel(CourseEntity course)
+    {
+        return string.IsNullOrWhiteSpace(course.Name) || course.Name == course.Code
+            ? course.Code
+            : $"{course.Code} - {course.Name}";
+    }
+
+    private void SetStatus(string message, bool isSuccess)
+    {
+        statusMessage = message;
+        statusCss = isSuccess ? "alert alert-success" : "alert alert-warning";
+    }
+}
