@@ -65,6 +65,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         isLecturer = await CurrentUserIsLecturerAsync();
+        Course.StartOfCourse = DateTime.Today;
+        Course.EndOfCourse = DateTime.Today;
     }
 
     // Runs when user clicks Create
