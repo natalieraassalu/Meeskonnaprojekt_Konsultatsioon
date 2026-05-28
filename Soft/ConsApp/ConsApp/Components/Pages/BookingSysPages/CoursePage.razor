@@ -147,6 +147,9 @@ else
     // Course Id taken from the URL.
     [Parameter] public Guid CourseId { get; set; }
 
+    // Optional ?view=student query param lets a lecturer preview the read-only student view.
+    [SupplyParameterFromQuery] public string? View { get; set; }
+
     // Data loaded for the page.
     private Course? course;
     private List<CoursePost> posts = new();
@@ -171,7 +174,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Decide whether the current user is a lecturer (controls all forms/buttons).
-        isLecturer = (await GetUserRoleAsync()) == "Lecturer";
+        // The "?view=student" query param forces student view even for lecturers.
+        isLecturer = (await GetUserRoleAsync()) == "Lecturer" && View != "student";
 
         // Load the course, its posts, and its materials.
         await LoadData();

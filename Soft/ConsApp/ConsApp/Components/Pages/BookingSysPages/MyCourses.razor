@@ -54,8 +54,10 @@ else
                             <div class="mt-auto">
                                 <a href="/myslots/@course.Id" class="btn btn-primary">Manage Slots</a>
                                 <a href="/courses/edit?id=@course.Id" class="btn btn-secondary">Edit Course</a>
-                                @* Opens the course page with announcements and materials. *@
-                                <a href="/course/@course.Id" class="btn btn-info">View Course Page</a>
+                                @* Opens the course page in lecturer mode (with Add/Edit/Delete). *@
+                                <a href="/course/@course.Id" class="btn btn-info">Edit Course Page</a>
+                                @* Opens the same page but in student POV (read-only). *@
+                                <a href="/course/@course.Id?view=student" class="btn btn-info">View Course Page</a>
                             </div>
                         </div>
                     </div>
