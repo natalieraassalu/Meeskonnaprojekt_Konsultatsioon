@@ -18,6 +18,7 @@ namespace ConsApp.Data
         public DbSet<Abc.Data.Consultation.Course> Course { get; set; }
         public DbSet<Abc.Data.Consultation.CourseConsultation> CourseConsultation { get; set; }
         public DbSet<Abc.Data.Consultation.CourseMaterial> CourseMaterial { get; set; }
+        public DbSet<Abc.Data.Consultation.CoursePost> CoursePost { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
