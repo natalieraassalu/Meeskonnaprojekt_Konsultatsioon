@@ -274,11 +274,21 @@ else
         foreach (var courseSelector in courseSelectors)
         {
             var student = await context.User.FirstOrDefaultAsync(u => u.Id == courseSelector.StudentId);
-            if (student is not null)
+            if (student is not null && !await IsLecturerAsync(context, student.Id))
             {
                 enrolledStudents.Add(student);
             }
         }
+    }
+
+    private async Task<bool> IsLecturerAsync(ConsApp.Data.ApplicationDbContext context, Guid userId)
+    {
+        // Keep lecturers out of the enrolled students list.
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == userId);
+
+        return userRole?.Role?.Name == "Lecturer";
     }
 
     // ---------- Announcements (lecturer only) ----------
