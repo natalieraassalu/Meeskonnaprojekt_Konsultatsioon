@@ -23,6 +23,16 @@ else
                 <ValidationSummary role="alert"/>
                 <input type="hidden" name="ConsultationSlot.Id" value="@ConsultationSlot.Id" />
                 <div class="mb-3">
+                    <label for="courseid" class="form-label">Course:</label>
+                    <InputSelect id="courseid" @bind-Value="CourseId" class="form-control">
+                        <option value="@Guid.Empty">-- select course --</option>
+                        @foreach (var course in courses)
+                        {
+                            <option value="@course.Id">@course.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
                     <label for="lecturerid" class="form-label">LecturerId:</label>
                     <input id="lecturerid" @bind="ConsultationSlot.LecturerId" class="form-control" type="text" />
                     <ValidationMessage For="() => ConsultationSlot.LecturerId" class="text-danger" />
@@ -74,10 +84,24 @@ else
     [SupplyParameterFromForm]
     private ConsultationSlot? ConsultationSlot { get; set; }
 
+    [SupplyParameterFromForm]
+    private Guid CourseId { get; set; }
+
+    private List<Course> courses = [];
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
         ConsultationSlot ??= await context.ConsultationSlot.FirstOrDefaultAsync(m => m.Id == Id);
+        courses = await context.Course.OrderBy(course => course.Name).ToListAsync();
+
+        if (ConsultationSlot is not null && CourseId == Guid.Empty)
+        {
+            CourseId = await context.CourseConsultation
+                .Where(courseConsultation => courseConsultation.ConsultationSlotId == ConsultationSlot.Id)
+                .Select(courseConsultation => courseConsultation.CourseId)
+                .FirstOrDefaultAsync();
+        }
 
         if (ConsultationSlot is null)
         {
@@ -91,6 +115,21 @@ else
     {
         using var context = DbFactory.CreateDbContext();
         context.Attach(ConsultationSlot!).State = EntityState.Modified;
+
+        var links = await context.CourseConsultation
+            .Where(courseConsultation => courseConsultation.ConsultationSlotId == ConsultationSlot!.Id)
+            .ToListAsync();
+
+        context.CourseConsultation.RemoveRange(links);
+
+        if (CourseId != Guid.Empty)
+        {
+            context.CourseConsultation.Add(new CourseConsultation
+            {
+                CourseId = CourseId,
+                ConsultationSlotId = ConsultationSlot!.Id
+            });
+        }
 
         try
         {

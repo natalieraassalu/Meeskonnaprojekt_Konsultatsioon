@@ -142,8 +142,15 @@ else
             return;
         }
 
-        // Load all slots for this course
-        slots = await context.ConsultationSlot.ToListAsync();
+        // Load only slots linked to this course.
+        slots = await (
+            from courseConsultation in context.CourseConsultation
+            join slot in context.ConsultationSlot
+                on courseConsultation.ConsultationSlotId equals slot.Id
+            where courseConsultation.CourseId == CourseId
+            orderby slot.StartTime
+            select slot)
+            .ToListAsync();
 
         lecturers = await context.User.ToListAsync();
     }
@@ -173,6 +180,11 @@ else
         };
 
         context.ConsultationSlot.Add(slot);
+        context.CourseConsultation.Add(new CourseConsultation
+        {
+            CourseId = CourseId,
+            ConsultationSlotId = slot.Id
+        });
         await context.SaveChangesAsync();
 
         // Reset the form
@@ -196,6 +208,11 @@ else
 
         if (slot is null) return;
 
+        var links = await context.CourseConsultation
+            .Where(courseConsultation => courseConsultation.ConsultationSlotId == slotId)
+            .ToListAsync();
+
+        context.CourseConsultation.RemoveRange(links);
         context.ConsultationSlot.Remove(slot);
         await context.SaveChangesAsync();
 

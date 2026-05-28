@@ -72,6 +72,11 @@
     private async Task DeleteConsultationSlot()
     {
         using var context = DbFactory.CreateDbContext();
+        var links = await context.CourseConsultation
+            .Where(courseConsultation => courseConsultation.ConsultationSlotId == consultationslot!.Id)
+            .ToListAsync();
+
+        context.CourseConsultation.RemoveRange(links);
         context.ConsultationSlot.Remove(consultationslot!);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/consultationslots");

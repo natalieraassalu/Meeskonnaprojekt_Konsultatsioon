@@ -89,9 +89,14 @@ else
             return;
         }
 
-        // Load all available slots
-        slots = await context.ConsultationSlot
-            .Where(s => s.IsBooked == false)
+        // Load only available slots linked to this course.
+        slots = await (
+            from courseConsultation in context.CourseConsultation
+            join slot in context.ConsultationSlot
+                on courseConsultation.ConsultationSlotId equals slot.Id
+            where courseConsultation.CourseId == Id && !slot.IsBooked
+            orderby slot.StartTime
+            select slot)
             .ToListAsync();
 
         users = await context.User.ToListAsync();
@@ -119,7 +124,13 @@ else
             return;
         }
 
-        var slot = await context.ConsultationSlot.FirstOrDefaultAsync(s => s.Id == slotId);
+        var slot = await (
+            from courseConsultation in context.CourseConsultation
+            join consultationSlot in context.ConsultationSlot
+                on courseConsultation.ConsultationSlotId equals consultationSlot.Id
+            where courseConsultation.CourseId == Id && consultationSlot.Id == slotId
+            select consultationSlot)
+            .FirstOrDefaultAsync();
 
         if (slot is null) { errorMessage = "Slot not found."; return; }
         if (slot.IsBooked) { errorMessage = "This slot was just booked by someone else."; return; }

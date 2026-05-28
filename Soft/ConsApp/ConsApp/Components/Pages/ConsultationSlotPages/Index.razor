@@ -14,6 +14,7 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Course</th>
             <th>Lecturer</th>
             <th>Start Time</th>
             <th>End Time</th>
@@ -26,6 +27,7 @@
         @foreach (var slot in slots)
         {
             <tr>
+                <td>@GetCourseNames(slot.Id)</td>
                 <!-- Show user name instead of LecturerId Guid -->
                 <td>@(users.FirstOrDefault(u => u.Id == slot.LecturerId)?.Name ?? "Unknown")</td>
                 <td>@slot.StartTime.ToString("g")</td>
@@ -45,11 +47,30 @@
 @code {
     private List<ConsultationSlot> slots = new();
     private List<Abc.Data.Consultation.User> users = new();
+    private List<Course> courses = new();
+    private List<CourseConsultation> courseConsultations = new();
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        slots = await context.ConsultationSlot.ToListAsync();
+        slots = await context.ConsultationSlot.OrderBy(slot => slot.StartTime).ToListAsync();
         users = await context.User.ToListAsync();
+        courses = await context.Course.ToListAsync();
+        courseConsultations = await context.CourseConsultation.ToListAsync();
+    }
+
+    private string GetCourseNames(Guid slotId)
+    {
+        var courseIds = courseConsultations
+            .Where(courseConsultation => courseConsultation.ConsultationSlotId == slotId)
+            .Select(courseConsultation => courseConsultation.CourseId)
+            .ToList();
+
+        var names = courses
+            .Where(course => courseIds.Contains(course.Id))
+            .Select(course => course.Name)
+            .ToList();
+
+        return names.Count == 0 ? "Unassigned" : string.Join(", ", names);
     }
 }

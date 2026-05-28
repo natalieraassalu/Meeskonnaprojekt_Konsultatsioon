@@ -15,6 +15,21 @@
         <EditForm method="post" Model="ConsultationSlot" OnValidSubmit="AddConsultationSlot" FormName="create" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <div class="mb-3">
+                <label for="courseid" class="form-label">Course:</label>
+                <InputSelect id="courseid" @bind-Value="CourseId" class="form-control">
+                    <option value="@Guid.Empty">-- select course --</option>
+                    @foreach (var course in courses)
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                </InputSelect>
+            </div>
 
             <div class="mb-3">
                 <label for="lecturerid" class="form-label">Lecturer:</label>
@@ -61,8 +76,13 @@
     [SupplyParameterFromForm]
     private ConsultationSlot ConsultationSlot { get; set; } = new();
 
+    [SupplyParameterFromForm]
+    private Guid CourseId { get; set; }
+
     // List of users used to fill the lecturer dropdown.
     private List<User> users = [];
+    private List<Course> courses = [];
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,15 +101,29 @@
         // Load all users from the database for the lecturer dropdown.
         using var context = DbFactory.CreateDbContext();
         users = await context.User.ToListAsync();
+        courses = await context.Course.OrderBy(course => course.Name).ToListAsync();
     }
 
     private async Task AddConsultationSlot()
     {
+        errorMessage = null;
+
+        if (CourseId == Guid.Empty)
+        {
+            errorMessage = "Please select a course.";
+            return;
+        }
+
         // Make sure IsBooked is false for new slots (form does not show it).
         ConsultationSlot.IsBooked = false;
 
         using var context = DbFactory.CreateDbContext();
         context.ConsultationSlot.Add(ConsultationSlot);
+        context.CourseConsultation.Add(new CourseConsultation
+        {
+            CourseId = CourseId,
+            ConsultationSlotId = ConsultationSlot.Id
+        });
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/consultationslots");
     }
