@@ -138,6 +138,44 @@ else
         </ul>
     }
 
+    @if (isLecturer)
+    {
+        <hr />
+
+        @* =========================== Enrolled Students =========================== *@
+        <h3>Enrolled Students</h3>
+
+        @if (enrolledStudents.Count == 0)
+        {
+            <p>No students enrolled yet.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in enrolledStudents)
+                    {
+                        <tr>
+                            <td>@student.Name</td>
+                            <td>
+                                <div class="d-flex justify-content-between align-items-center gap-3">
+                                    <span>@student.Email</span>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveStudent(student.Id)">Remove</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+
     <div class="mt-3">
         <a href="/" class="btn btn-secondary">Back</a>
     </div>
@@ -154,6 +192,7 @@ else
     private Course? course;
     private List<CoursePost> posts = new();
     private List<(CourseMaterial link, Material material)> materials = new();
+    private List<User> enrolledStudents = new();
 
     // True only if the logged-in user has role "Lecturer".
     private bool isLecturer = false;
@@ -202,6 +241,29 @@ else
             select new { link = cm, material = m }
         ).ToListAsync();
         materials = rows.Select(r => (r.link, r.material)).ToList();
+
+        await LoadEnrolledStudents(context);
+    }
+
+    private async Task LoadEnrolledStudents(ConsApp.Data.ApplicationDbContext context)
+    {
+        enrolledStudents.Clear();
+
+        if (!isLecturer) return;
+
+        // Load each enrolled student's user details from CourseSelector.
+        var courseSelectors = await context.CourseSelector
+            .Where(cs => cs.CourseId == CourseId)
+            .ToListAsync();
+
+        foreach (var courseSelector in courseSelectors)
+        {
+            var student = await context.User.FirstOrDefaultAsync(u => u.Id == courseSelector.StudentId);
+            if (student is not null)
+            {
+                enrolledStudents.Add(student);
+            }
+        }
     }
 
     // ---------- Announcements (lecturer only) ----------
@@ -309,6 +371,26 @@ else
 
         // Just remove the link row - the Material itself stays in case other courses use it.
         context.CourseMaterial.Remove(link);
+        await context.SaveChangesAsync();
+        await LoadData();
+    }
+
+    // ---------- Enrolled students (lecturer only) ----------
+
+    private async Task RemoveStudent(Guid studentId)
+    {
+        if (!isLecturer) return;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Remove this enrollment so the course disappears from the student's My Courses page.
+        var enrollments = await context.CourseSelector
+            .Where(cs => cs.CourseId == CourseId && cs.StudentId == studentId)
+            .ToListAsync();
+
+        if (enrollments.Count == 0) return;
+
+        context.CourseSelector.RemoveRange(enrollments);
         await context.SaveChangesAsync();
         await LoadData();
     }
