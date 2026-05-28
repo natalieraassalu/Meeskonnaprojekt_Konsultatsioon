@@ -151,28 +151,40 @@ else
         }
         else
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var student in enrolledStudents)
-                    {
+            var studentsToShow = GetEnrolledStudentsToShow();
+
+            <div class="d-flex justify-content-end mb-2">
+                <input class="form-control" style="max-width: 260px;" placeholder="Search students" @bind="studentSearchText" @bind:event="oninput" />
+            </div>
+
+            @if (studentsToShow.Count == 0)
+            {
+                <p>No matching students found.</p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>@student.Name</td>
-                            <td>
-                                <div class="d-flex justify-content-between align-items-center gap-3">
-                                    <span>@student.Email</span>
-                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveStudent(student.Id)">Remove</button>
-                                </div>
-                            </td>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in studentsToShow)
+                        {
+                            <tr>
+                                <td>@student.Name</td>
+                                <td>@student.Email</td>
+                                <td class="text-end">
+                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveStudent(student.Id)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         }
     }
 
@@ -209,6 +221,9 @@ else
     // Add-Material form fields.
     private string newMaterialName = "";
     private string newMaterialUrl = "";
+
+    // Student search text for the lecturer-only enrolled students list.
+    private string studentSearchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -393,6 +408,20 @@ else
         context.CourseSelector.RemoveRange(enrollments);
         await context.SaveChangesAsync();
         await LoadData();
+    }
+
+    private List<User> GetEnrolledStudentsToShow()
+    {
+        if (string.IsNullOrWhiteSpace(studentSearchText))
+        {
+            return enrolledStudents;
+        }
+
+        return enrolledStudents
+            .Where(student =>
+                student.Name.Contains(studentSearchText, StringComparison.OrdinalIgnoreCase) ||
+                student.Email.Contains(studentSearchText, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     // ---------- Role helper (same pattern as Home / MyCourses / NavMenu) ----------
