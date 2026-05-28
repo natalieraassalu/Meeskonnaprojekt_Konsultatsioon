@@ -3,47 +3,55 @@
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Create Course</PageTitle>
 
 <h1>Create Course</h1>
 <hr />
 
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Course" OnValidSubmit="AddCourse">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+@if (!isLecturer)
+{
+    <p>Only lecturers can create courses.</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="Course" OnValidSubmit="AddCourse">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
 
-            <div class="mb-3">
-                <label class="form-label">Name:</label>
-                <InputText @bind-Value="Course.Name" class="form-control" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Name:</label>
+                    <InputText @bind-Value="Course.Name" class="form-control" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Code:</label>
-                <InputText @bind-Value="Course.Code" class="form-control" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Code:</label>
+                    <InputText @bind-Value="Course.Code" class="form-control" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Details:</label>
-                <InputText @bind-Value="Course.Details" class="form-control" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Details:</label>
+                    <InputText @bind-Value="Course.Details" class="form-control" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Start of Course:</label>
-                <InputDate @bind-Value="Course.StartOfCourse" class="form-control" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Start of Course:</label>
+                    <InputDate @bind-Value="Course.StartOfCourse" class="form-control" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">End of Course:</label>
-                <InputDate @bind-Value="Course.EndOfCourse" class="form-control" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">End of Course:</label>
+                    <InputDate @bind-Value="Course.EndOfCourse" class="form-control" />
+                </div>
 
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </EditForm>
+        </div>
     </div>
-</div>
+}
 
 <div>
     <a href="/courses">Back to List</a>
@@ -52,13 +60,41 @@
 @code {
     // The course object we are filling in
     private Course Course { get; set; } = new();
+    private bool isLecturer = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLecturer = await CurrentUserIsLecturerAsync();
+    }
 
     // Runs when user clicks Create
     private async Task AddCourse()
     {
+        if (!await CurrentUserIsLecturerAsync())
+        {
+            return;
+        }
+
         using var context = DbFactory.CreateDbContext();
         context.Course.Add(Course);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/courses");
+    }
+
+    private async Task<bool> CurrentUserIsLecturerAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (string.IsNullOrEmpty(email)) return false;
+
+        using var context = DbFactory.CreateDbContext();
+        var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null) return false;
+
+        var userRole = await context.UserRole
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+
+        return userRole?.Role?.Name == "Lecturer";
     }
 }

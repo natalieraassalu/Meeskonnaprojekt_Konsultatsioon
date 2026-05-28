@@ -6,15 +6,14 @@
 
 <PageTitle>Courses</PageTitle>
 
-<h1>Courses</h1>
-
-@* Only lecturers can create new courses - hide the link for students. *@
-@if (isLecturer)
-{
-    <p>
-        <a href="courses/create">Create New</a>
-    </p>
-}
+<div class="d-flex justify-content-between align-items-start gap-3">
+    <h1>Courses</h1>
+    @* Only lecturers can create new courses - hide the button for students. *@
+    @if (isLecturer)
+    {
+        <a href="/courses/create" class="btn btn-success mt-2">Create New Course</a>
+    }
+</div>
 
 <table class="table">
     <thead>
