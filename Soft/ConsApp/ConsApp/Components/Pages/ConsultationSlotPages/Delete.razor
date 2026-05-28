@@ -16,7 +16,8 @@
     {
         <p><em>Loading...</em></p>
     }
-    else {
+    else
+    {
         <dl class="row">
             <dt class="col-sm-2">LecturerId</dt>
             <dd class="col-sm-10">@consultationslot.LecturerId</dd>
@@ -72,12 +73,24 @@
     private async Task DeleteConsultationSlot()
     {
         using var context = DbFactory.CreateDbContext();
+
         var links = await context.CourseConsultation
             .Where(courseConsultation => courseConsultation.ConsultationSlotId == consultationslot!.Id)
             .ToListAsync();
 
         context.CourseConsultation.RemoveRange(links);
+
+        // First, delete any bookings that reference this slot
+        // (can't delete the slot while BookingPage rows point to it)
+        var relatedBookings = await context.BookingPage
+            .Where(b => b.SlotId == consultationslot!.Id)
+            .ToListAsync();
+
+        context.BookingPage.RemoveRange(relatedBookings);
+
+        // Now it's safe to delete the slot itself
         context.ConsultationSlot.Remove(consultationslot!);
+
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/consultationslots");
     }
