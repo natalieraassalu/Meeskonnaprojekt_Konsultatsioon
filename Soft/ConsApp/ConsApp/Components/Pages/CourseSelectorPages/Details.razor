@@ -1,4 +1,4 @@
-@page "/courseselectors/details"
+@page "/courseselector/details"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
@@ -29,8 +29,8 @@
             <dd class="col-sm-10">@courseselector.ValidTo</dd>
         </dl>
         <div>
-            <a href="@($"/courseselectors/edit?id={courseselector.Id}")">Edit</a> |
-            <a href="@($"/courseselectors")">Back to List</a>
+            <a href="@($"/courseselector/edit?id={courseselector.Id}")">Edit</a> |
+            <a href="@($"/courseselector")">Back to List</a>
         </div>
     }
 </div>

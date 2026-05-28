@@ -1,4 +1,4 @@
-@page "/courseselectors/delete"
+@page "/courseselector/delete"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
@@ -39,7 +39,7 @@
         </dl>
         <EditForm method="post" Model="courseselector" OnValidSubmit="DeleteCourseSelector" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(courseselector is null)">Delete</button> |
-            <a href="/courseselectors">Back to List</a>
+            <a href="/courseselector">Back to List</a>
         </EditForm>
     }
 </div>
@@ -66,6 +66,6 @@
         using var context = DbFactory.CreateDbContext();
         context.CourseSelector.Remove(courseselector!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/courseselectors");
+        NavigationManager.NavigateTo("/courseselector");
     }
 }

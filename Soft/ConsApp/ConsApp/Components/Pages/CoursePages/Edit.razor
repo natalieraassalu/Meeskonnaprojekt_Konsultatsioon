@@ -43,7 +43,7 @@ else
 }
 
 <div>
-    <a href="/courses">Back to List</a>
+    <a href="/mycourses">Back to List</a>
 </div>
 
 @code {
@@ -68,6 +68,6 @@ else
         using var context = DbFactory.CreateDbContext();
         context.Course.Update(course);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/courses");
+        NavigationManager.NavigateTo("/mycourses");
     }
 }

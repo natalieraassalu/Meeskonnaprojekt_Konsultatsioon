@@ -1,4 +1,4 @@
-@page "/courseselectors/edit"
+@page "/courseselector/edit"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
@@ -54,7 +54,7 @@ else
 }
 
 <div>
-    <a href="/courseselectors">Back to List</a>
+    <a href="/courseselector">Back to List</a>
 </div>
 
 @code {
@@ -98,7 +98,7 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/courseselectors");
+        NavigationManager.NavigateTo("/courseselector");
     }
 
     private bool CourseSelectorExists(Guid id)

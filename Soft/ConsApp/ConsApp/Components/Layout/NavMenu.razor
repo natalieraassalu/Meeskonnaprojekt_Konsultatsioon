@@ -51,6 +51,11 @@
                             <span class="bi bi-calendar-check-nav-menu" aria-hidden="true"></span> My Bookings
                         </NavLink>
                     </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="courseselector">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Course Selector
+                        </NavLink>
+                    </div>
                 }
 
                 @* Lecturer sees My Courses, Consultation Slots, Course Selectors. *@
@@ -67,8 +72,8 @@
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="courseselectors">
-                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selectors
+                        <NavLink class="nav-link" href="courseselector">
+                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selector
                         </NavLink>
                     </div>
                 }
@@ -87,8 +92,8 @@
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="courseselectors">
-                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selectors
+                        <NavLink class="nav-link" href="courseselector">
+                            <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Course Selector
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
@@ -119,11 +124,6 @@
                 }
 
                 @* Account/logout (same for all logged-in users). *@
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="courseselector">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Course Selector
-                    </NavLink>
-                </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
