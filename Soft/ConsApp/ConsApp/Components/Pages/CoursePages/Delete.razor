@@ -50,9 +50,29 @@ else
     {
         if (course is null) return;
 
-        // Remove the course from the database.
         using var context = DbFactory.CreateDbContext();
+
+        // Delete all student enrollments for this course first
+        var selectors = await context.CourseSelector
+            .Where(cs => cs.CourseId == course.Id)
+            .ToListAsync();
+        context.CourseSelector.RemoveRange(selectors);
+
+        // Delete all material links for this course
+        var materials = await context.CourseMaterial
+            .Where(cm => cm.CourseId == course.Id)
+            .ToListAsync();
+        context.CourseMaterial.RemoveRange(materials);
+
+        // Delete all announcements/posts for this course
+        var posts = await context.CoursePost
+            .Where(cp => cp.CourseId == course.Id)
+            .ToListAsync();
+        context.CoursePost.RemoveRange(posts);
+
+        // Now it's safe to delete the course itself
         context.Course.Remove(course);
+
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/courses");
     }
