@@ -3,6 +3,7 @@
 @using Abc.Data.Consultation
 @inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Create</PageTitle>
 
@@ -31,18 +32,7 @@
                 </InputSelect>
             </div>
 
-            <div class="mb-3">
-                <label for="lecturerid" class="form-label">Lecturer:</label>
-                <InputSelect id="lecturerid" @bind-Value="ConsultationSlot.LecturerId" class="form-control">
-                    <option value="@Guid.Empty">-- select lecturer --</option>
-                    @* Loop through all users and show their name as a lecturer option. *@
-                    @foreach (var user in users)
-                    {
-                        <option value="@user.Id">@user.Name</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => ConsultationSlot.LecturerId" class="text-danger" />
-            </div>
+            @* The lecturer is the logged-in user, so no dropdown is shown. *@
 
             <div class="mb-3">
                 <label for="starttime" class="form-label">StartTime:</label>
@@ -79,9 +69,12 @@
     [SupplyParameterFromForm]
     private Guid CourseId { get; set; }
 
-    // List of users used to fill the lecturer dropdown.
-    private List<User> users = [];
+    // List of courses for the dropdown.
     private List<Course> courses = [];
+
+    // The logged-in user's domain User.Id - used as the slot's LecturerId.
+    private Guid loggedInUserId = Guid.Empty;
+
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
@@ -98,10 +91,22 @@
             ConsultationSlot.EndTime = DateTime.Now.AddHours(1);
         }
 
-        // Load all users from the database for the lecturer dropdown.
         using var context = DbFactory.CreateDbContext();
-        users = await context.User.ToListAsync();
+
+        // Load courses for the dropdown.
         courses = await context.Course.OrderBy(course => course.Name).ToListAsync();
+
+        // Look up the logged-in user's domain User row by email so we can set LecturerId later.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+        if (!string.IsNullOrEmpty(email))
+        {
+            var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+            if (user is not null)
+            {
+                loggedInUserId = user.Id;
+            }
+        }
     }
 
     private async Task AddConsultationSlot()
@@ -114,8 +119,18 @@
             return;
         }
 
+        // Make sure we found the logged-in user - otherwise we can't set the lecturer.
+        if (loggedInUserId == Guid.Empty)
+        {
+            errorMessage = "Could not find your user account. Please log in again.";
+            return;
+        }
+
         // Make sure IsBooked is false for new slots (form does not show it).
         ConsultationSlot.IsBooked = false;
+
+        // The logged-in user is the lecturer for this slot.
+        ConsultationSlot.LecturerId = loggedInUserId;
 
         using var context = DbFactory.CreateDbContext();
         context.ConsultationSlot.Add(ConsultationSlot);
