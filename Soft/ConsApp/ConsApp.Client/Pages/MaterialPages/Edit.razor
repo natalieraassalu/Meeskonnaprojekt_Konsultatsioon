@@ -1,0 +1,29 @@
+﻿@page "/materials/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMaterialsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Material"
+    EntityTitle="Material"
+    Entity="material"
+    BasePath="/materials"
+    EntityId="@Id"
+    OnValidSubmit="updateMaterial" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private Material material { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        material ??= await repo.GetAsync(Id);
+        if (material is null) NavigationManager.NotFound();
+    }
+    private async Task updateMaterial()
+    {
+        await repo.UpdateAsync(material!);
+        NavigationManager.NavigateTo("/materials");
+    }
+}

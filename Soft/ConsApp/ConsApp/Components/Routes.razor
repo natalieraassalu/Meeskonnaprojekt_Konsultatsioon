@@ -1,7 +1,7 @@
 @using System.Reflection
 
 <Router AppAssembly="typeof(Program).Assembly"
-        AdditionalAssemblies="new[] { typeof(ConsApp.Client.RedirectToLogin).Assembly }">
+        AdditionalAssemblies="new[] { typeof(Abc.Soft.ConsApp.Client.RedirectToLogin).Assembly }">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>

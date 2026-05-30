@@ -1,0 +1,26 @@
+﻿@page "/materials/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMaterialsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Material" EntityTitle="Material" Entity="material" BasePath="/materials" OnValidSubmit="deleteMaterial" />
+
+@code {
+    private Material material;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        material = await repo.GetAsync(Id);
+        if (material is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteMaterial()
+    {
+        await repo.DeleteAsync(material.Id);
+        NavigationManager.NavigateTo("/materials");
+    }
+}

@@ -1,0 +1,22 @@
+﻿@page "/consultationslots/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IConsultationSlotsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Consultation Slot"
+    EntityTitle="Consultation Slot"
+    Entity="consultationSlot"
+    EntityId="consultationSlot?.Id"
+    BasePath="/consultationslots" />
+
+@code {
+    private ConsultationSlot consultationSlot;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        consultationSlot = await repo.GetAsync(Id);
+        if (consultationSlot is null) NavigationManager.NotFound();
+    }
+}

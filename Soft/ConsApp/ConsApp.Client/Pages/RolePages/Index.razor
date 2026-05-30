@@ -1,0 +1,16 @@
+﻿@page "/roles"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IRolesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="Role"
+             PageTitleText="Role Page"
+             EntityTitle="Roles"
+             Repo="repo"
+             BasePath="roles">
+</MyIndexPage>
+
+@code {
+}

@@ -23,9 +23,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CourseConsultation> CourseConsultation { get; set; } = default!;
     public DbSet<Feedback> Feedback { get; set; } = default!;
     public DbSet<Notification> Notification { get; set; } = default!;
+    public DbSet<CoursePost> CoursePost { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder b) {
          base.OnModelCreating(b);
          b.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+         // Consultation-specific mapping (ported from the former ConsApp.Data context),
+         // scoped to Abc.Data.Consultation entities so Movie's mapping is untouched.
+         // These three entities carry a [Timestamp] rowversion that ConsApp does not persist.
+         b.Entity<Course>().Ignore(e => e.Timestamp);
+         b.Entity<Material>().Ignore(e => e.Timestamp);
+         b.Entity<CourseMaterial>().Ignore(e => e.Timestamp);
+
+         // Disable cascade delete on consultation FKs to avoid multiple-cascade-path errors.
+         foreach (var relationship in b.Model.GetEntityTypes()
+                      .Where(e => e.ClrType.Namespace == "Abc.Data.Consultation")
+                      .SelectMany(e => e.GetForeignKeys()))
+         {
+             relationship.DeleteBehavior = DeleteBehavior.NoAction;
+         }
     }
 }

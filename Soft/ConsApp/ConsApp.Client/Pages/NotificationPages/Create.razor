@@ -1,0 +1,19 @@
+﻿@page "/notifications/create"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@using Abc.Razor.Pages
+@attribute [ExcludeFromInteractiveRouting]
+@inject INotificationsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="notification" EntityTitle="Notification" BasePath="/notifications" OnValidSubmit="addNotification" />
+
+@code {
+    [SupplyParameterFromForm] private Notification notification { get; set; } = default!;
+    protected override void OnInitialized() => notification ??= new();
+    private async Task addNotification()
+    {
+        await repo.CreateAsync(notification);
+        NavigationManager.NavigateTo("/notifications");
+    }
+}

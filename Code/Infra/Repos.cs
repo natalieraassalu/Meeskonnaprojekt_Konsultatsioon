@@ -68,3 +68,48 @@ public class UserRolesRepo(ApplicationDbContext c = null)
         .Include(x => x.Role);
 }
 
+public class BookingPagesRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, BookingPage>(c), IBookingPagesRepo
+{
+    protected override IQueryable<BookingPage> Query() => db.BookingPage
+        .Include(x => x.Slot)
+        .Include(x => x.Student);
+}
+
+public class ConsultationSlotsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, ConsultationSlot>(c), IConsultationSlotsRepo
+{
+    protected override IQueryable<ConsultationSlot> Query() => db.ConsultationSlot
+        .Include(x => x.Lecturer);
+}
+
+public class CourseConsultationsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, CourseConsultation>(c), ICourseConsultationsRepo
+{ }
+
+public class CourseSelectorsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, CourseSelector>(c), ICourseSelectorsRepo
+{
+    protected override IQueryable<CourseSelector> Query() => db.CourseSelector
+        .Include(x => x.Course)
+        .Include(x => x.Lecturer)
+        .Include(x => x.Student);
+}
+
+public class FeedbacksRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Feedback>(c), IFeedbacksRepo
+{ }
+
+public class NotificationsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, Notification>(c), INotificationsRepo
+{
+    protected override IQueryable<Notification> Query() => db.Notification
+        .Include(x => x.ConsultationSlot)
+        .Include(x => x.Lecturer)
+        .Include(x => x.Student);
+}
+
+public class CoursePostsRepo(ApplicationDbContext c = null)
+    : EfBaseRepo<ApplicationDbContext, CoursePost>(c), ICoursePostsRepo
+{ }
+

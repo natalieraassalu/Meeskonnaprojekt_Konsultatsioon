@@ -1,0 +1,16 @@
+﻿@page "/consultationslots"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IConsultationSlotsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="ConsultationSlot"
+             PageTitleText="Consultation Slot Page"
+             EntityTitle="Consultation Slots"
+             Repo="repo"
+             BasePath="consultationslots">
+</MyIndexPage>
+
+@code {
+}

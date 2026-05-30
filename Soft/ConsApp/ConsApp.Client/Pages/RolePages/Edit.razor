@@ -1,0 +1,29 @@
+﻿@page "/roles/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IRolesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Role"
+    EntityTitle="Role"
+    Entity="role"
+    BasePath="/roles"
+    EntityId="@Id"
+    OnValidSubmit="updateRole" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private Role role { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        role ??= await repo.GetAsync(Id);
+        if (role is null) NavigationManager.NotFound();
+    }
+    private async Task updateRole()
+    {
+        await repo.UpdateAsync(role!);
+        NavigationManager.NavigateTo("/roles");
+    }
+}

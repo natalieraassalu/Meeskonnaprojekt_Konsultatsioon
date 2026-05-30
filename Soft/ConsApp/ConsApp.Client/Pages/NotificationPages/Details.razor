@@ -1,0 +1,22 @@
+﻿@page "/notifications/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject INotificationsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Notification"
+    EntityTitle="Notification"
+    Entity="notification"
+    EntityId="notification?.Id"
+    BasePath="/notifications" />
+
+@code {
+    private Notification notification;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        notification = await repo.GetAsync(Id);
+        if (notification is null) NavigationManager.NotFound();
+    }
+}

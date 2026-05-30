@@ -1,0 +1,26 @@
+﻿@page "/courses/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICoursesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Course" EntityTitle="Course" Entity="course" BasePath="/courses" OnValidSubmit="deleteCourse" />
+
+@code {
+    private Course course;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        course = await repo.GetAsync(Id);
+        if (course is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteCourse()
+    {
+        await repo.DeleteAsync(course.Id);
+        NavigationManager.NavigateTo("/courses");
+    }
+}

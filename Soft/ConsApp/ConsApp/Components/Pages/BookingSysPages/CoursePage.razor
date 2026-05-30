@@ -1,7 +1,7 @@
 @page "/course/{CourseId:guid}"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -240,7 +240,7 @@ else
         using var context = DbFactory.CreateDbContext();
 
         // The course itself.
-        course = await context.Course.FirstOrDefaultAsync(c => c.Id == CourseId);
+        course = await context.Courses.FirstOrDefaultAsync(c => c.Id == CourseId);
 
         // All announcements for this course, newest first.
         posts = await context.CoursePost
@@ -250,8 +250,8 @@ else
 
         // CourseMaterial rows joined with Material rows to get names and URLs.
         var rows = await (
-            from cm in context.CourseMaterial
-            join m in context.Material on cm.MaterialId equals m.Id
+            from cm in context.CourseMaterials
+            join m in context.Materials on cm.MaterialId equals m.Id
             where cm.CourseId == CourseId
             select new { link = cm, material = m }
         ).ToListAsync();
@@ -260,7 +260,7 @@ else
         await LoadEnrolledStudents(context);
     }
 
-    private async Task LoadEnrolledStudents(ConsApp.Data.ApplicationDbContext context)
+    private async Task LoadEnrolledStudents(Abc.Infra.ApplicationDbContext context)
     {
         enrolledStudents.Clear();
 
@@ -281,7 +281,7 @@ else
         }
     }
 
-    private async Task<bool> IsLecturerAsync(ConsApp.Data.ApplicationDbContext context, Guid userId)
+    private async Task<bool> IsLecturerAsync(Abc.Infra.ApplicationDbContext context, Guid userId)
     {
         // Keep lecturers out of the enrolled students list.
         var userRole = await context.UserRole
@@ -371,10 +371,10 @@ else
             Name = newMaterialName,
             Details = newMaterialUrl ?? ""
         };
-        context.Material.Add(material);
+        context.Materials.Add(material);
 
         // Link the new material to this course.
-        context.CourseMaterial.Add(new CourseMaterial
+        context.CourseMaterials.Add(new CourseMaterial
         {
             CourseId = CourseId,
             MaterialId = material.Id
@@ -391,11 +391,11 @@ else
     private async Task DeleteMaterial(Guid courseMaterialId)
     {
         using var context = DbFactory.CreateDbContext();
-        var link = await context.CourseMaterial.FirstOrDefaultAsync(cm => cm.Id == courseMaterialId);
+        var link = await context.CourseMaterials.FirstOrDefaultAsync(cm => cm.Id == courseMaterialId);
         if (link is null) return;
 
         // Just remove the link row - the Material itself stays in case other courses use it.
-        context.CourseMaterial.Remove(link);
+        context.CourseMaterials.Remove(link);
         await context.SaveChangesAsync();
         await LoadData();
     }

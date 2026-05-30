@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -81,7 +81,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        course = await context.Course.FirstOrDefaultAsync(c => c.Id == Id);
+        course = await context.Courses.FirstOrDefaultAsync(c => c.Id == Id);
 
         if (course is null)
         {

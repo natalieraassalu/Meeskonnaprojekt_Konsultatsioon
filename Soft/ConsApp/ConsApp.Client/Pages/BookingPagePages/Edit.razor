@@ -1,0 +1,29 @@
+﻿@page "/bookingpages/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IBookingPagesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Booking Page"
+    EntityTitle="Booking Page"
+    Entity="bookingPage"
+    BasePath="/bookingpages"
+    EntityId="@Id"
+    OnValidSubmit="updateBookingPage" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private BookingPage bookingPage { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        bookingPage ??= await repo.GetAsync(Id);
+        if (bookingPage is null) NavigationManager.NotFound();
+    }
+    private async Task updateBookingPage()
+    {
+        await repo.UpdateAsync(bookingPage!);
+        NavigationManager.NavigateTo("/bookingpages");
+    }
+}

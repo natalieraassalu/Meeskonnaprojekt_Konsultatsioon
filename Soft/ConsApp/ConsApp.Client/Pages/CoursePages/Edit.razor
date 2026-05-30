@@ -1,0 +1,29 @@
+﻿@page "/courses/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICoursesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Course"
+    EntityTitle="Course"
+    Entity="course"
+    BasePath="/courses"
+    EntityId="@Id"
+    OnValidSubmit="updateCourse" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private Course course { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        course ??= await repo.GetAsync(Id);
+        if (course is null) NavigationManager.NotFound();
+    }
+    private async Task updateCourse()
+    {
+        await repo.UpdateAsync(course!);
+        NavigationManager.NavigateTo("/courses");
+    }
+}

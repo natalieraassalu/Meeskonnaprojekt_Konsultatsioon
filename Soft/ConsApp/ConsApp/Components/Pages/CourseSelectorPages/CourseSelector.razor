@@ -1,10 +1,10 @@
 @page "/courseselector"
-@namespace ConsApp.Components.Pages
+@namespace Abc.Soft.ConsApp.Components.Pages
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
 @using CourseSelectorEntity = Abc.Data.Consultation.CourseSelector
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Course Selector</PageTitle>
@@ -60,7 +60,7 @@ else
         await LoadCourses(context);
     }
 
-    private async Task LoadCourses(ConsApp.Data.ApplicationDbContext context)
+    private async Task LoadCourses(Abc.Infra.ApplicationDbContext context)
     {
         if (currentUser is null) return;
 
@@ -69,7 +69,7 @@ else
             .Select(cs => cs.CourseId)
             .ToListAsync();
 
-        courses = await context.Course
+        courses = await context.Courses
             .Where(c => !selectedCourseIds.Contains(c.Id))
             .OrderBy(c => c.Name)
             .ToListAsync();

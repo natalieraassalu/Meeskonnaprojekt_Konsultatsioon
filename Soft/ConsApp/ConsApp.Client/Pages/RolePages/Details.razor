@@ -1,0 +1,22 @@
+﻿@page "/roles/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IRolesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Role"
+    EntityTitle="Role"
+    Entity="role"
+    EntityId="role?.Id"
+    BasePath="/roles" />
+
+@code {
+    private Role role;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        role = await repo.GetAsync(Id);
+        if (role is null) NavigationManager.NotFound();
+    }
+}

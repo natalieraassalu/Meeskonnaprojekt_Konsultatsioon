@@ -1,0 +1,29 @@
+﻿@page "/feedbacks/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IFeedbacksRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Feedback"
+    EntityTitle="Feedback"
+    Entity="feedback"
+    BasePath="/feedbacks"
+    EntityId="@Id"
+    OnValidSubmit="updateFeedback" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private Feedback feedback { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        feedback ??= await repo.GetAsync(Id);
+        if (feedback is null) NavigationManager.NotFound();
+    }
+    private async Task updateFeedback()
+    {
+        await repo.UpdateAsync(feedback!);
+        NavigationManager.NavigateTo("/feedbacks");
+    }
+}

@@ -1,6 +1,6 @@
-using ConsApp.Components.Account.Pages;
-using ConsApp.Components.Account.Pages.Manage;
-using ConsApp.Data;
+using Abc.Soft.ConsApp.Components.Account.Pages;
+using Abc.Soft.ConsApp.Components.Account.Pages.Manage;
+using Abc.Infra;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;

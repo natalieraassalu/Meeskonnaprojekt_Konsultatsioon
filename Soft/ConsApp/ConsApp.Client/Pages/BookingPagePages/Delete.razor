@@ -1,0 +1,26 @@
+﻿@page "/bookingpages/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IBookingPagesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Booking Page" EntityTitle="Booking Page" Entity="bookingPage" BasePath="/bookingpages" OnValidSubmit="deleteBookingPage" />
+
+@code {
+    private BookingPage bookingPage;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        bookingPage = await repo.GetAsync(Id);
+        if (bookingPage is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteBookingPage()
+    {
+        await repo.DeleteAsync(bookingPage.Id);
+        NavigationManager.NavigateTo("/bookingpages");
+    }
+}

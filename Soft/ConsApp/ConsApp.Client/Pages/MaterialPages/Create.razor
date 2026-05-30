@@ -1,0 +1,19 @@
+﻿@page "/materials/create"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@using Abc.Razor.Pages
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMaterialsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="material" EntityTitle="Material" BasePath="/materials" OnValidSubmit="addMaterial" />
+
+@code {
+    [SupplyParameterFromForm] private Material material { get; set; } = default!;
+    protected override void OnInitialized() => material ??= new();
+    private async Task addMaterial()
+    {
+        await repo.CreateAsync(material);
+        NavigationManager.NavigateTo("/materials");
+    }
+}

@@ -1,0 +1,26 @@
+﻿@page "/consultationslots/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IConsultationSlotsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete Consultation Slot" EntityTitle="Consultation Slot" Entity="consultationSlot" BasePath="/consultationslots" OnValidSubmit="deleteConsultationSlot" />
+
+@code {
+    private ConsultationSlot consultationSlot;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        consultationSlot = await repo.GetAsync(Id);
+        if (consultationSlot is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteConsultationSlot()
+    {
+        await repo.DeleteAsync(consultationSlot.Id);
+        NavigationManager.NavigateTo("/consultationslots");
+    }
+}

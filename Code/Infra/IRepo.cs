@@ -25,3 +25,10 @@ public interface ICourseMaterialsRepo : IRepo<CourseMaterial> { }
 public interface IUsersRepo : IRepo<User> { }
 public interface IRolesRepo : IRepo<Role> { }
 public interface IUserRolesRepo : IRepo<UserRole> { }
+public interface IBookingPagesRepo : IRepo<BookingPage> { }
+public interface IConsultationSlotsRepo : IRepo<ConsultationSlot> { }
+public interface ICourseConsultationsRepo : IRepo<CourseConsultation> { }
+public interface ICourseSelectorsRepo : IRepo<CourseSelector> { }
+public interface IFeedbacksRepo : IRepo<Feedback> { }
+public interface INotificationsRepo : IRepo<Notification> { }
+public interface ICoursePostsRepo : IRepo<CoursePost> { }

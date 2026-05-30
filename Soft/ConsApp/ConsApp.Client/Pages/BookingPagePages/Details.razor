@@ -1,0 +1,22 @@
+﻿@page "/bookingpages/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IBookingPagesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Booking Page"
+    EntityTitle="Booking Page"
+    Entity="bookingPage"
+    EntityId="bookingPage?.Id"
+    BasePath="/bookingpages" />
+
+@code {
+    private BookingPage bookingPage;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        bookingPage = await repo.GetAsync(Id);
+        if (bookingPage is null) NavigationManager.NotFound();
+    }
+}

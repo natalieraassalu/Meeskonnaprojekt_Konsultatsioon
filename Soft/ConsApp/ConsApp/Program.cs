@@ -1,11 +1,12 @@
-﻿using Abc.Infra;
-using ConsApp.Client.Pages;
-using ConsApp.Components;
-using ConsApp.Components.Account;
+using Abc.Infra;
+using Abc.Soft.ConsApp;
+using Abc.Soft.ConsApp.Components;
+using Abc.Soft.ConsApp.Components.Account;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,52 +29,64 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContextFactory<ConsApp.Data.ApplicationDbContext>(options =>
+
+// Single shared Abc.Infra context. The factory is used by the custom server-rendered
+// pages (IDbContextFactory), while the scoped instance backs Identity + the EF repos.
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDbContextFactory<Abc.Infra.ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddScoped(sp =>
+    sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ConsApp.Data.ApplicationUser>(options =>
+// IgnoreCycles so the CRUD Web APIs can serialize entities with navigation cycles.
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = false;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
-    .AddEntityFrameworkStores<ConsApp.Data.ApplicationDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
-builder.Services.AddSingleton<IEmailSender<ConsApp.Data.ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-
+// EF repositories (server-side implementations of the shared IRepo<T> contracts).
 builder.Services.AddScoped<ICoursesRepo, CoursesRepo>();
 builder.Services.AddScoped<IMaterialsRepo, MaterialsRepo>();
 builder.Services.AddScoped<ICourseMaterialsRepo, CourseMaterialsRepo>();
 builder.Services.AddScoped<IUsersRepo, UsersRepo>();
 builder.Services.AddScoped<IRolesRepo, RolesRepo>();
 builder.Services.AddScoped<IUserRolesRepo, UserRolesRepo>();
+builder.Services.AddScoped<IBookingPagesRepo, BookingPagesRepo>();
+builder.Services.AddScoped<IConsultationSlotsRepo, ConsultationSlotsRepo>();
+builder.Services.AddScoped<ICourseConsultationsRepo, CourseConsultationsRepo>();
+builder.Services.AddScoped<ICourseSelectorsRepo, CourseSelectorsRepo>();
+builder.Services.AddScoped<IFeedbacksRepo, FeedbacksRepo>();
+builder.Services.AddScoped<INotificationsRepo, NotificationsRepo>();
+builder.Services.AddScoped<ICoursePostsRepo, CoursePostsRepo>();
 
 var app = builder.Build();
 
-// Seed the two roles ("Lecturer" and "Student") on startup if they don't already exist.
+// Apply migrations and seed the two roles ("Lecturer", "Student") once on startup.
 using (var scope = app.Services.CreateScope())
 {
-    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ConsApp.Data.ApplicationDbContext>>();
+    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
     using var context = dbFactory.CreateDbContext();
+    await context.Database.MigrateAsync();
 
-    // Add "Lecturer" role if missing.
-     {
+    if (!context.Role.Any(r => r.Name == "Lecturer"))
+    {
         context.Role.Add(new Abc.Data.Consultation.Role { Name = "Lecturer" });
     }
-
-    // Add "Student" role if missing.
     if (!context.Role.Any(r => r.Name == "Student"))
     {
         context.Role.Add(new Abc.Data.Consultation.Role { Name = "Student" });
     }
-
-    context.SaveChanges();
+    await context.SaveChangesAsync();
 }
 
 // Configure the HTTP request pipeline.
@@ -98,7 +111,21 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(ConsApp.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Abc.Soft.ConsApp.Client._Imports).Assembly);
+
+// CRUD Web API endpoints (one MapXApi per entity).
+app.MapCoursesApi();
+app.MapMaterialsApi();
+app.MapCourseMaterialsApi();
+app.MapConsultationSlotsApi();
+app.MapBookingPagesApi();
+app.MapCourseConsultationsApi();
+app.MapFeedbacksApi();
+app.MapNotificationsApi();
+app.MapRolesApi();
+app.MapUsersApi();
+app.MapUserRolesApi();
+app.MapCoursePostsApi();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();

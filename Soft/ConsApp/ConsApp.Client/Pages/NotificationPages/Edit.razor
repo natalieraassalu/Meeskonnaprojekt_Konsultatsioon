@@ -1,0 +1,29 @@
+﻿@page "/notifications/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject INotificationsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Notification"
+    EntityTitle="Notification"
+    Entity="notification"
+    BasePath="/notifications"
+    EntityId="@Id"
+    OnValidSubmit="updateNotification" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private Notification notification { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        notification ??= await repo.GetAsync(Id);
+        if (notification is null) NavigationManager.NotFound();
+    }
+    private async Task updateNotification()
+    {
+        await repo.UpdateAsync(notification!);
+        NavigationManager.NavigateTo("/notifications");
+    }
+}

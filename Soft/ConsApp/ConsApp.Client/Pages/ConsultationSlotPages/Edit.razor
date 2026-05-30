@@ -1,0 +1,29 @@
+﻿@page "/consultationslots/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IConsultationSlotsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit Consultation Slot"
+    EntityTitle="Consultation Slot"
+    Entity="consultationSlot"
+    BasePath="/consultationslots"
+    EntityId="@Id"
+    OnValidSubmit="updateConsultationSlot" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private ConsultationSlot consultationSlot { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        consultationSlot ??= await repo.GetAsync(Id);
+        if (consultationSlot is null) NavigationManager.NotFound();
+    }
+    private async Task updateConsultationSlot()
+    {
+        await repo.UpdateAsync(consultationSlot!);
+        NavigationManager.NavigateTo("/consultationslots");
+    }
+}

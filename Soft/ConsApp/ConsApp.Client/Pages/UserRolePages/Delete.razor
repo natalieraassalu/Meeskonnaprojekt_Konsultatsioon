@@ -1,0 +1,26 @@
+﻿@page "/userroles/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IUserRolesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete User Role" EntityTitle="User Role" Entity="userRole" BasePath="/userroles" OnValidSubmit="deleteUserRole" />
+
+@code {
+    private UserRole userRole;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        userRole = await repo.GetAsync(Id);
+        if (userRole is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteUserRole()
+    {
+        await repo.DeleteAsync(userRole.Id);
+        NavigationManager.NavigateTo("/userroles");
+    }
+}

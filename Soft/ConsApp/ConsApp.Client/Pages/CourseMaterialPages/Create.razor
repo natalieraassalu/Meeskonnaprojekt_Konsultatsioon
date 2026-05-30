@@ -1,0 +1,19 @@
+﻿@page "/coursematerials/create"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@using Abc.Razor.Pages
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICourseMaterialsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="courseMaterial" EntityTitle="Course Material" BasePath="/coursematerials" OnValidSubmit="addCourseMaterial" />
+
+@code {
+    [SupplyParameterFromForm] private CourseMaterial courseMaterial { get; set; } = default!;
+    protected override void OnInitialized() => courseMaterial ??= new();
+    private async Task addCourseMaterial()
+    {
+        await repo.CreateAsync(courseMaterial);
+        NavigationManager.NavigateTo("/coursematerials");
+    }
+}

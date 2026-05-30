@@ -1,0 +1,26 @@
+﻿@page "/users/delete"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IUsersRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDeletePage PageTitleText="Delete User" EntityTitle="User" Entity="user" BasePath="/users" OnValidSubmit="deleteUser" />
+
+@code {
+    private User user;
+
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await repo.GetAsync(Id);
+        if (user is null) NavigationManager.NotFound();
+    }
+
+    private async Task deleteUser()
+    {
+        await repo.DeleteAsync(user.Id);
+        NavigationManager.NavigateTo("/users");
+    }
+}

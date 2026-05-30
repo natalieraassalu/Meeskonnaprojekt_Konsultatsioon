@@ -1,0 +1,22 @@
+﻿@page "/materials/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IMaterialsRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Material"
+    EntityTitle="Material"
+    Entity="material"
+    EntityId="material?.Id"
+    BasePath="/materials" />
+
+@code {
+    private Material material;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        material = await repo.GetAsync(Id);
+        if (material is null) NavigationManager.NotFound();
+    }
+}

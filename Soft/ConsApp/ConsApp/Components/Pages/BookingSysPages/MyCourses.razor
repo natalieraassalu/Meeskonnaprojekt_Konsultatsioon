@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>My Courses</PageTitle>
@@ -107,7 +107,7 @@ else
             .Select(cs => cs.CourseId)
             .ToListAsync();
 
-        courses = await context.Course
+        courses = await context.Courses
             .Where(c => courseIds.Contains(c.Id))
             .ToListAsync();
     }

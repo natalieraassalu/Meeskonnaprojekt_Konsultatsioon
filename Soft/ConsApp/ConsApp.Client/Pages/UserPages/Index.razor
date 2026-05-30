@@ -1,0 +1,16 @@
+﻿@page "/users"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IUsersRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="User"
+             PageTitleText="User Page"
+             EntityTitle="Users"
+             Repo="repo"
+             BasePath="users">
+</MyIndexPage>
+
+@code {
+}

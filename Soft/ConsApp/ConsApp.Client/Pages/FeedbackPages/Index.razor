@@ -1,0 +1,16 @@
+﻿@page "/feedbacks"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IFeedbacksRepo repo
+@inject NavigationManager NavigationManager
+
+<MyIndexPage TItem="Feedback"
+             PageTitleText="Feedback Page"
+             EntityTitle="Feedbacks"
+             Repo="repo"
+             BasePath="feedbacks">
+</MyIndexPage>
+
+@code {
+}

@@ -1,0 +1,29 @@
+﻿@page "/users/edit"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject IUsersRepo repo
+@inject NavigationManager NavigationManager
+
+<MyEditPage
+    PageTitleText="Edit User"
+    EntityTitle="User"
+    Entity="user"
+    BasePath="/users"
+    EntityId="@Id"
+    OnValidSubmit="updateUser" />
+
+@code {
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    [SupplyParameterFromForm] private User user { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        user ??= await repo.GetAsync(Id);
+        if (user is null) NavigationManager.NotFound();
+    }
+    private async Task updateUser()
+    {
+        await repo.UpdateAsync(user!);
+        NavigationManager.NavigateTo("/users");
+    }
+}

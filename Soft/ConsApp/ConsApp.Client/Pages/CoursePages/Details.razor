@@ -1,0 +1,22 @@
+﻿@page "/courses/details"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@attribute [ExcludeFromInteractiveRouting]
+@inject ICoursesRepo repo
+@inject NavigationManager NavigationManager
+
+<MyDetailsPage
+    PageTitleText="Details Course"
+    EntityTitle="Course"
+    Entity="course"
+    EntityId="course?.Id"
+    BasePath="/courses" />
+
+@code {
+    private Course course;
+    [SupplyParameterFromQuery] private Guid Id { get; set; }
+    protected override async Task OnInitializedAsync() {
+        course = await repo.GetAsync(Id);
+        if (course is null) NavigationManager.NotFound();
+    }
+}

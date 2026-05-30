@@ -1,0 +1,19 @@
+﻿@page "/feedbacks/create"
+@using Abc.Data.Consultation
+@using Abc.Infra
+@using Abc.Razor.Pages
+@attribute [ExcludeFromInteractiveRouting]
+@inject IFeedbacksRepo repo
+@inject NavigationManager NavigationManager
+
+<MyCreatePage Entity="feedback" EntityTitle="Feedback" BasePath="/feedbacks" OnValidSubmit="addFeedback" />
+
+@code {
+    [SupplyParameterFromForm] private Feedback feedback { get; set; } = default!;
+    protected override void OnInitialized() => feedback ??= new();
+    private async Task addFeedback()
+    {
+        await repo.CreateAsync(feedback);
+        NavigationManager.NavigateTo("/feedbacks");
+    }
+}

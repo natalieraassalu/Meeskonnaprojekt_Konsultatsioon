@@ -6,7 +6,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
-@using ConsApp.Data
+@using Abc.Infra
 @using Abc.Data.Consultation
 
 @inject UserManager<ApplicationUser> UserManager
@@ -16,7 +16,7 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 
 <PageTitle>Register</PageTitle>
 

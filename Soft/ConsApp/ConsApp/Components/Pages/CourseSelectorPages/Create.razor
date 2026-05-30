@@ -1,7 +1,7 @@
 @page "/courseselector/create"
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create Course</PageTitle>
@@ -39,7 +39,7 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        context.Course.Add(course);
+        context.Courses.Add(course);
         await context.SaveChangesAsync();
 
         NavigationManager.NavigateTo("/courseselector");

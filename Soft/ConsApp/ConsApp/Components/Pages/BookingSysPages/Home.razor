@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Abc.Data.Consultation
-@inject IDbContextFactory<ConsApp.Data.ApplicationDbContext> DbFactory
+@inject IDbContextFactory<Abc.Infra.ApplicationDbContext> DbFactory
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
@@ -113,7 +113,7 @@ else
         }
 
         // Load only the courses the student is enrolled in.
-        courses = await context.Course
+        courses = await context.Courses
             .Where(c => enrolledCourseIds.Contains(c.Id))
             .ToListAsync();
     }

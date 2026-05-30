@@ -1,8 +1,8 @@
-using ConsApp.Data;
+using Abc.Infra;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConsApp.Components.Account
+namespace Abc.Soft.ConsApp.Components.Account
 {
     internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
     {

@@ -1,4 +1,4 @@
-namespace ConsApp.Components.Account
+namespace Abc.Soft.ConsApp.Components.Account
 {
     public enum PasskeyOperation
     {
