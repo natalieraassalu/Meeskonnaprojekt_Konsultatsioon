@@ -2,15 +2,11 @@
 
 namespace Abc.Razor.Code;
 
-public class RelatedLists : List<RelatedList>
-{
-    public RelatedLists(object o)
-    {
-        foreach (var p in o?.GetType().GetProperties() ?? [])
-        {
+public class RelatedLists : List<RelatedList> {
+    public RelatedLists(object o) {
+        foreach (var p in o?.GetType().GetProperties() ?? []) {
             if (typeof(IEnumerable).IsAssignableFrom(p.PropertyType)
-                && isCollectionOfClasses(p.PropertyType))
-            {
+                && isCollectionOfClasses(p.PropertyType)) {
                 var items = (p.GetValue(o) as IEnumerable).Cast<object>();
                 if (items is null) continue;
                 Add(new RelatedList(p, items.AsQueryable()));
