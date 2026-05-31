@@ -47,7 +47,8 @@ namespace Microsoft.AspNetCore.Routing
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
-                return TypedResults.LocalRedirect($"~/{returnUrl}");
+                // After logout, always leave protected pages and go to Login.
+                return TypedResults.LocalRedirect("~/Account/Login");
             });
 
             accountGroup.MapPost("/PasskeyCreationOptions", async (
