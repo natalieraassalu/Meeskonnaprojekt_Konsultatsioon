@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Abc.Tests.Aids;
 
 [TestClass]
@@ -38,29 +35,20 @@ public sealed class CloneTests
     [TestMethod] public void CloneTest()=> Assert.AreNotSame(person, clone);
     [TestMethod] public void SamePersonNameTest()=>Assert.AreEqual(person.Name, clone.Name);
     [TestMethod]public void SameCityTest()=>Assert.AreEqual(person.Address.City, clone.Address.City);
-
-    [TestMethod]
-    public void ChangePersonNameText()
+    [TestMethod] public void ChangePersonNameText()
     {
         clone.Name = "Bla bla";
         Assert.AreEqual("John Doe", person.Name);
     }
     [TestMethod] public void NotSameAddressTest()=>Assert.AreNotSame(person.Address, clone.Address);
-
-    [TestMethod]
-    public void ChangeCityTest()
+    [TestMethod] public void ChangeCityTest()
     {
         clone.Address.City = "Bla bla";
         Assert.AreEqual("New York", person.Address.City);
-    }
-
-    [TestMethod]
-    public void ChangeAddressTest()
+    } 
+    [TestMethod] public void ChangeAddressTest()
     {
         clone.Address = new Address { City = "Bla bla" };
         Assert.AreEqual("New York", person.Address.City);
     }
-
-
-
 }

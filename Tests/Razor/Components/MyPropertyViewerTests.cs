@@ -1,19 +1,20 @@
-﻿namespace Abc.Tests.Razor.Components;
-
+﻿
 using Abc.Aids;
 using Abc.Razor.Components;
 using Abc.Tests.Aids;
 using Bunit;
+using TestContext = Bunit.TestContext;
 
-[TestClass]
-public sealed class MyPropertyViewerTests : BaseTests<MyPropertyViewer>
+namespace Abc.Tests.Razor.Components;
+
+[TestClass] public sealed class MyPropertyViewerTests : BaseTests<MyPropertyViewer>
 {
     private MyPropertyViewer o;
     private string l;
     private string v;
     private TestContext c;
-    [TestInitialize]
-    override public void Initialize()
+
+    [TestInitialize] override public void Initialize()
     {
         base.Initialize();
         l = GetRandom.String(5, 10);
@@ -21,26 +22,22 @@ public sealed class MyPropertyViewerTests : BaseTests<MyPropertyViewer>
         o = new MyPropertyViewer { Label = l, Value = v };
         c = new TestContext();
     }
-    [TestCleanup]
-    public void Cleanup()
+    [TestCleanup] public void Cleanup()
     {
         c.Dispose();
         c = null;
     }
-    [TestMethod]
-    public void LabelTest()
+    [TestMethod] public void LabelTest()
     {
         areEqual(string.Empty, obj.Label);
         areEqual(l, o.Label);
     }
-    [TestMethod]
-    public void ValueTest()
+    [TestMethod] public void ValueTest()
     {
         areEqual(null, obj.Value);
         areEqual(v, o.Value);
     }
-    [TestMethod]
-    public void RenderMarkupTest()
+    [TestMethod] public void RenderMarkupTest()
     {
         var r = c.RenderComponent<MyPropertyViewer>(p => p
             .Add(x => x.Label, l)

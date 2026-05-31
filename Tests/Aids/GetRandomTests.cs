@@ -79,7 +79,6 @@ namespace Abc.Tests.Aids;
     [TestMethod] public void GuidTest()
         => Assert.AreNotEqual(GetRandom.Guid(), GetRandom.Guid());
     private class testClass:NamedEntity{}
-
     [TestMethod] public void ObjectTest()
     {
         var o1 = GetRandom.Object(typeof(testClass));

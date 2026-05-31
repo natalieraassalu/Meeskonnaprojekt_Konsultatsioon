@@ -1,9 +1,7 @@
 ﻿
-using System.Diagnostics.CodeAnalysis;
-using System.Formats.Asn1;
 using System.Reflection;
-namespace Abc.Tests.Aids;
 
+namespace Abc.Tests.Aids;
 public abstract class TestAids<TClass>:TestAids where TClass : class, new()
 {
     protected TClass obj;

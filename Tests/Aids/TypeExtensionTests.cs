@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using Abc.Aids;
 
 namespace Abc.Tests.Aids;
@@ -31,7 +29,21 @@ namespace Abc.Tests.Aids;
     [DataRow(typeof(byte))]
     [DataRow(typeof(byte?))]
     [DataRow(typeof(int))]
-    [DataRow(typeof(int?))]
+    [DataRow(typeof(uint?))]
+    [DataRow(typeof(short))]
+    [DataRow(typeof(short?))]
+    [DataRow(typeof(ushort))]
+    [DataRow(typeof(ushort?))]
+    [DataRow(typeof(long))]
+    [DataRow(typeof(long?))]
+    [DataRow(typeof(ulong))]
+    [DataRow(typeof(ulong?))]
+    [DataRow(typeof(float))]
+    [DataRow(typeof(float?))]
+    [DataRow(typeof(double))]
+    [DataRow(typeof(double?))]
+    [DataRow(typeof(decimal))]
+    [DataRow(typeof(decimal?))]
     [TestMethod] public void IsNumericTest(Type t)
     {
         Assert.IsTrue(TypeExtension.IsNumeric(t));

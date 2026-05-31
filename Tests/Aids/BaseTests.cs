@@ -1,4 +1,5 @@
-﻿namespace Abc.Tests.Aids;
+﻿
+namespace Abc.Tests.Aids;
 
 public abstract class BaseTests<TClass>:TestAids<TClass> where TClass : class, new()
 {

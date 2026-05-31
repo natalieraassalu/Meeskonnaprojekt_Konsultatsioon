@@ -10,6 +10,12 @@
     <UseVSTest>true</UseVSTest>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Pages\**" />
+    <EmbeddedResource Remove="Pages\**" />
+    <None Remove="Pages\**" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Code\Razor\Razor.csproj" />
 		<ProjectReference Include="..\Aids\Tests.Aids.csproj" />
@@ -31,10 +37,6 @@
 
   <ItemGroup>
     <PackageReference Update="MSTest.TestFramework" Version="4.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pages\" />
   </ItemGroup>
 
 </Project>

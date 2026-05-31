@@ -22,9 +22,7 @@
   <Folder Name="/Tests/">
     <Project Path="Tests/Aids/Tests.Aids.csproj" />
     <Project Path="Tests/Data/Tests.Data.csproj" />
-    <Project Path="Tests/Domain/Tests.Domain.csproj" />
     <Project Path="Tests/Infra/Tests.Infra.csproj" />
-    <Project Path="Tests/Jobs/Tests.Jobs.csproj" />
     <Project Path="Tests/Razor/Tests.Razor.csproj" />
   </Folder>
 </Solution>
