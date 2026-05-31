@@ -8,34 +8,26 @@
 
 <PageTitle>@(course?.Name ?? "Course")</PageTitle>
 
-@if (course is null)
-{
+@if (course is null) {
     <p><em>Loading...</em></p>
 }
-else
-{
+else {
     <h1>@course.Name</h1>
     <p>@course.Details</p>
     <hr />
-
-    @if (successMessage != null)
-    {
+    @if (successMessage != null) {
         <div class="alert alert-success">@successMessage</div>
     }
-
-    @if (errorMessage != null)
-    {
+    @if (errorMessage != null) {
         <div class="alert alert-danger">@errorMessage</div>
     }
 
     <h3>Available Consultation Slots</h3>
 
-    @if (slots.Count == 0)
-    {
+    @if (slots.Count == 0){
         <p>No available slots for this course.</p>
     }
-    else
-    {
+    else{
         <table class="table">
             <thead>
                 <tr>
@@ -47,10 +39,9 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var slot in slots)
-                {
+                @foreach (var slot in slots){
                     <tr>
-                        <td>@(users.FirstOrDefault(u => u.Id == slot.LecturerId)?.Name ?? "Unknown")</td>
+                        <td>@(slot.Lecturer?.Name ?? "Unknown")</td>
                         <td>@slot.StartTime.ToString("g")</td>
                         <td>@slot.EndTime.ToString("g")</td>
                         <td>@slot.MeetingLink</td>
@@ -74,83 +65,69 @@ else
 
     private Course? course;
     private List<ConsultationSlot> slots = new();
-    private List<Abc.Data.Consultation.User> users = new();
     private string? successMessage;
     private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         using var context = DbFactory.CreateDbContext();
         course = await context.Courses.FirstOrDefaultAsync(c => c.Id == Id);
 
-        if (course is null)
-        {
+        if (course is null) {
             NavigationManager.NotFound();
             return;
         }
 
-        // Load only available slots linked to this course.
-        slots = await (
-            from courseConsultation in context.CourseConsultation
-            join slot in context.ConsultationSlot
-                on courseConsultation.ConsultationSlotId equals slot.Id
-            where courseConsultation.CourseId == Id && !slot.IsBooked
-            orderby slot.StartTime
-            select slot)
+        slots = await CourseSlots(context)
+            .Where(slot => !slot.IsBooked)
             .ToListAsync();
-
-        users = await context.User.ToListAsync();
     }
-
-    private async Task BookSlot(Guid slotId)
-    {
+    private async Task BookSlot(Guid slotId) {
         successMessage = null;
         errorMessage = null;
 
         using var context = DbFactory.CreateDbContext();
 
-        // Get the logged-in user's email from the authentication state.
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var email = authState.User.Identity?.Name;
-
-        // Find the matching User record by email so we can set StudentId.
-        var student = string.IsNullOrEmpty(email)
-            ? null
-            : await context.User.FirstOrDefaultAsync(u => u.Email == email);
-
-        if (student is null)
-        {
+        var student = await GetCurrentUserAsync(context);
+        if (student is null){
             errorMessage = "Please complete your profile first";
             return;
         }
 
-        var slot = await (
-            from courseConsultation in context.CourseConsultation
-            join consultationSlot in context.ConsultationSlot
-                on courseConsultation.ConsultationSlotId equals consultationSlot.Id
-            where courseConsultation.CourseId == Id && consultationSlot.Id == slotId
-            select consultationSlot)
-            .FirstOrDefaultAsync();
+        var slot = await CourseSlots(context).FirstOrDefaultAsync(slot => slot.Id == slotId);
 
         if (slot is null) { errorMessage = "Slot not found."; return; }
         if (slot.IsBooked) { errorMessage = "This slot was just booked by someone else."; return; }
 
         slot.IsBooked = true;
-        context.ConsultationSlot.Update(slot);
 
-        var booking = new BookingPage
-        {
+        context.BookingPage.Add(new BookingPage{
             SlotId = slotId,
-            // Tie the booking to the logged-in student so the FK is satisfied.
             StudentId = student.Id,
             BookingDate = DateTime.Now,
             Note = string.Empty
-        };
-        context.BookingPage.Add(booking);
+        });
 
         await context.SaveChangesAsync();
 
         slots.RemoveAll(s => s.Id == slotId);
         successMessage = "Slot booked successfully!";
+    }
+    private IQueryable<ConsultationSlot> CourseSlots(Abc.Infra.ApplicationDbContext context){
+        var slotIds = context.CourseConsultation
+            .Where(courseConsultation => courseConsultation.CourseId == Id)
+            .Select(courseConsultation => courseConsultation.ConsultationSlotId);
+
+        return context.ConsultationSlot
+            .Include(slot => slot.Lecturer)
+            .Where(slot => slotIds.Contains(slot.Id))
+            .OrderBy(slot => slot.StartTime);
+    }
+    private async Task<Abc.Data.Consultation.User?> GetCurrentUserAsync(Abc.Infra.ApplicationDbContext context){
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var email = authState.User.Identity?.Name;
+
+        if (string.IsNullOrEmpty(email)) return null;
+
+        return await context.User.FirstOrDefaultAsync(user => user.Email == email);
     }
 }
