@@ -13,27 +13,19 @@
 <p>Select a course and add it to My Courses.</p>
 <hr />
 
-@if (!string.IsNullOrEmpty(message))
-{
+@if (!string.IsNullOrEmpty(message)) {
     <div class="alert alert-info">@message</div>
 }
 
-@if (currentUser is null)
-{
-    <p>Please log in first.</p>
-}
-else if (courses.Count == 0)
-{
+@if (courses.Count == 0) {
     <p>No available courses.</p>
 }
-else
-{
+else {
     <div class="mb-3">
         <label for="courseid" class="form-label">Course:</label>
         <InputSelect id="courseid" @bind-Value="selectedCourseId" class="form-control">
             <option value="@Guid.Empty">-- select course --</option>
-            @foreach (var course in courses)
-            {
+            @foreach (var course in courses) {
                 <option value="@course.Id">@course.Name</option>
             }
         </InputSelect>
@@ -43,29 +35,28 @@ else
 }
 
 @code {
-    private User? currentUser;
+    private Guid currentUserId;
     private List<Course> courses = new();
     private Guid selectedCourseId = Guid.Empty;
     private string message = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         using var context = DbFactory.CreateDbContext();
 
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.Identity?.Name;
 
-        currentUser = await context.User.FirstOrDefaultAsync(u => u.Email == email);
+        currentUserId = await context.User
+            .Where(user => user.Email == email)
+            .Select(user => user.Id)
+            .FirstAsync();
 
         await LoadCourses(context);
     }
 
-    private async Task LoadCourses(Abc.Infra.ApplicationDbContext context)
-    {
-        if (currentUser is null) return;
-
+    private async Task LoadCourses(Abc.Infra.ApplicationDbContext context) {
         var selectedCourseIds = await context.CourseSelector
-            .Where(cs => cs.StudentId == currentUser.Id)
+            .Where(cs => cs.StudentId == currentUserId)
             .Select(cs => cs.CourseId)
             .ToListAsync();
 
@@ -75,23 +66,18 @@ else
             .ToListAsync();
     }
 
-    private async Task AddToMyCourses()
-    {
-        if (currentUser is null) return;
-
-        if (selectedCourseId == Guid.Empty)
-        {
+    private async Task AddToMyCourses() {
+        if (selectedCourseId == Guid.Empty) {
             message = "Please choose a course.";
             return;
         }
 
         using var context = DbFactory.CreateDbContext();
 
-        context.CourseSelector.Add(new CourseSelectorEntity
-        {
+        context.CourseSelector.Add(new CourseSelectorEntity {
             CourseId = selectedCourseId,
-            StudentId = currentUser.Id,
-            LecturerId = currentUser.Id
+            StudentId = currentUserId,
+            LecturerId = currentUserId
         });
 
         await context.SaveChangesAsync();
