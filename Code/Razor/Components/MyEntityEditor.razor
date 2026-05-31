@@ -1,7 +1,10 @@
 ﻿@foreach (var p in Entity?.GetType().GetProperties() ?? []) {
+    @if (Exclude.Contains(p.Name)) continue;
     <MyPropertyEditor Item="Entity" PropertyName="@p.Name" />
 }
 
 @code {
     [Parameter] public object Entity { get; set; }
+    // Property names to omit from this form (e.g. fields a given page shouldn't expose).
+    [Parameter] public string[] Exclude { get; set; } = [];
 }

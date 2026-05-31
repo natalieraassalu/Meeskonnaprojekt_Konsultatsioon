@@ -1,6 +1,8 @@
 ﻿using Abc.Aids;
+using Abc.Shared.Code;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -37,7 +39,7 @@ public sealed partial class EditorAdapter(ComponentBase c, object item, string p
             ["Value"] = ad.PropValue,
             ["ValueChanged"] = valChanged(),
             ["ValueExpression"] = valExpression()
-        }.withSelectParams(hasSelect);
+        }.withSelectParams(hasSelect).withDateType(isDateTime);
     public IDictionary<string, object> ValidationParams
         => new Dictionary<string, object> {
             ["For"] = valExpression(),
@@ -69,8 +71,12 @@ public sealed partial class EditorAdapter(ComponentBase c, object item, string p
     internal static Type generic(Type editor, Type t) => editor.MakeGenericType(t);
     internal bool isSelect => hasSelect is not null && propType == typeof(Guid?);
     internal SelectAttribute hasSelect => ad?.PropInfo?.GetCustomAttribute<SelectAttribute>();
+    // A date property marked [DataType(DataType.DateTime)] renders as a date+time
+    // picker (InputDateType.DateTimeLocal) instead of the date-only default.
+    internal bool isDateTime => underlyingType.IsDate()
+        && ad?.PropInfo?.GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.DateTime;
 
-    public bool HasEditor => Editor is not null;
+    public bool HasEditor => Editor is not null && !MyGridAids.IsHidden(PropInfo);
     public bool HasProperty => PropInfo is not null;
 }
 file static class EditorParamsExtensions {
@@ -78,6 +84,12 @@ file static class EditorParamsExtensions {
         if (a is null) return d;
         d[nameof(SelectAttribute.EntityType)] = a.EntityType;
         d[nameof(SelectAttribute.DisplayProperty)] = a.DisplayProperty;
+        return d;
+    }
+    public static IDictionary<string, object> withDateType(this IDictionary<string, object> d, bool isDateTime) {
+        if (!isDateTime) return d;
+        d[nameof(InputDate<DateTime>.Type)] = InputDateType.DateTimeLocal;
+        d["step"] = "60"; // minute granularity: show date + hours + minutes, hide the seconds field
         return d;
     }
 

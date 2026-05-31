@@ -9,7 +9,7 @@
         <EditForm method="post" Model="Entity" OnValidSubmit="@HandleValidSubmit" FormName="create" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
-            <MyEntityEditor Entity="Entity" />
+            <MyEntityEditor Entity="Entity" Exclude="Exclude" />
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -25,6 +25,8 @@
     [Parameter] public object Entity { get; set; }
     [Parameter] public string BasePath { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+    // Property names to omit from the create form (forwarded to MyEntityEditor).
+    [Parameter] public string[] Exclude { get; set; } = [];
     // [Parameter] public RenderFragment ChildContent { get; set; }
 
     private async Task HandleValidSubmit() {

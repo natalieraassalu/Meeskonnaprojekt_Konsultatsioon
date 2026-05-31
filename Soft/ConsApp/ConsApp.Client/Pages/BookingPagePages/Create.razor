@@ -9,7 +9,7 @@
 <MyCreatePage Entity="bookingPage" EntityTitle="Booking Page" BasePath="/bookingpages" OnValidSubmit="addBookingPage" />
 
 @code {
-    [SupplyParameterFromForm] private BookingPage bookingPage { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(BookingPage))] private BookingPage bookingPage { get; set; } = default!;
     protected override void OnInitialized() => bookingPage ??= new();
     private async Task addBookingPage()
     {

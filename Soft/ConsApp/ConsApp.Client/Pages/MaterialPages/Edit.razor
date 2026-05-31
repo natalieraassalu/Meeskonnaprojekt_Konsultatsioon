@@ -15,7 +15,7 @@
 
 @code {
     [SupplyParameterFromQuery] private Guid Id { get; set; }
-    [SupplyParameterFromForm] private Material material { get; set; }
+    [SupplyParameterFromForm(Name = nameof(Material))] private Material material { get; set; }
     protected override async Task OnInitializedAsync()
     {
         material ??= await repo.GetAsync(Id);

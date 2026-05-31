@@ -9,7 +9,7 @@
 <MyCreatePage Entity="notification" EntityTitle="Notification" BasePath="/notifications" OnValidSubmit="addNotification" />
 
 @code {
-    [SupplyParameterFromForm] private Notification notification { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(Notification))] private Notification notification { get; set; } = default!;
     protected override void OnInitialized() => notification ??= new();
     private async Task addNotification()
     {

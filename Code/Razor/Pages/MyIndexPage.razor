@@ -7,9 +7,12 @@
 
 <h1>@EntityTitle</h1>
 
-<p>
-    <a href=@($"{BasePath}/create")>Create New</a>
-</p>
+@if (ShowCreate)
+{
+    <p>
+        <a href=@($"{BasePath}/create")>Create New</a>
+    </p>
+}
 
 @* <MyEntitiesTable TEntity="TItem" Entities="Items" BasePath="@BasePath" />
  *@
@@ -21,5 +24,7 @@
     [Parameter] public string EntityTitle { get; set; }
     [Parameter] public IRepo<TItem> Repo { get; set; }
     [Parameter] public string BasePath { get; set; }
+    // Set false to hide the "Create New" link on a given index page (default shows it).
+    [Parameter] public bool ShowCreate { get; set; } = true;
 
 }

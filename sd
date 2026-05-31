@@ -1,0 +1,122 @@
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/BookingPagePages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/BookingPagePages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/ConsultationSlotPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/ConsultationSlotPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CourseConsultationPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CourseConsultationPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CourseMaterialPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CourseMaterialPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CoursePages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CoursePages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CoursePostPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/CoursePostPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/FeedbackPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/FeedbackPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/MaterialPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/MaterialPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/NotificationPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/NotificationPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/RolePages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/RolePages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/UserPages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/UserPages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/UserRolePages/Create.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp.Client/Pages/UserRolePages/Edit.razor', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Soft/ConsApp/ConsApp/Components/Pages/BookingSysPages/MyBookings.razor', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/Code/Data/Consultation/ConsultationSlot.cs b/Code/Data/Consultation/ConsultationSlot.cs[m
+[1mindex e6261b6..11c74b4 100644[m
+[1m--- a/Code/Data/Consultation/ConsultationSlot.cs[m
+[1m+++ b/Code/Data/Consultation/ConsultationSlot.cs[m
+[36m@@ -1,10 +1,11 @@[m
+[31m-﻿using Abc.Data.Common;[m
+[32m+[m[32m﻿using Abc.Aids;[m
+[32m+[m[32musing Abc.Data.Common;[m
+ [m
+ namespace Abc.Data.Consultation;[m
+ [m
+ public sealed class ConsultationSlot : BaseEntity[m
+ {[m
+[31m-    public Guid LecturerId { get; set; }[m
+[32m+[m[32m    [Select(typeof(User))] public Guid LecturerId { get; set; }[m
+ [m
+     public DateTime StartTime { get; set; }[m
+     public DateTime EndTime { get; set; }[m
+[1mdiff --git a/Code/Data/Consultation/Course.cs b/Code/Data/Consultation/Course.cs[m
+[1mindex be55ef2..08247c7 100644[m
+[1m--- a/Code/Data/Consultation/Course.cs[m
+[1m+++ b/Code/Data/Consultation/Course.cs[m
+[36m@@ -1,22 +1,17 @@[m
+ ﻿using Abc.Aids;[m
+ using Abc.Data.Common;[m
+ using System.ComponentModel.DataAnnotations;[m
+[32m+[m[32musing System.Runtime.Serialization;[m
+ [m
+ namespace Abc.Data.Consultation;[m
+ [m
+ public sealed class Course : NamedEntity[m
+ {[m
+[31m-    [Random(6, 8, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")][m
+[31m-    public string Code { get; set; } = "";[m
+[31m-[m
+[31m-    [Random(20, 100)][m
+[31m-    public string Details { get; set; } = "";[m
+[31m-[m
+[31m-    public DateTime StartOfCourse { get; set; }[m
+[31m-[m
+[31m-    public DateTime EndOfCourse { get; set; }[m
+[31m-[m
+[31m-    public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];[m
+[32m+[m[32m    // Navigation collection: excluded from Blazor form binding ([IgnoreDataMember])[m
+[32m+[m[32m    // to break the Course<->CourseMaterial<->Material reference cycle, which would[m
+[32m+[m[32m    // otherwise exceed the form mapper's max recursion depth. EF mapping and the[m
+[32m+[m[32m    // System.Text.Json API (which honors [JsonIgnore], not this) are unaffected.[m
+[32m+[m[32m    [IgnoreDataMember] public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];[m
+ [m
+     [Timestamp] public byte[] Timestamp { get; set; } = [];[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/Code/Data/Consultation/Material.cs b/Code/Data/Consultation/Material.cs[m
+[1mindex fa8afbd..564628f 100644[m
+[1m--- a/Code/Data/Consultation/Material.cs[m
+[1m+++ b/Code/Data/Consultation/Material.cs[m
+[36m@@ -1,19 +1,19 @@[m
+ ﻿using Abc.Aids;[m
+ using Abc.Data.Common;[m
+ using System.ComponentModel.DataAnnotations;[m
+[32m+[m[32musing System.Runtime.Serialization;[m
+ [m
+ namespace Abc.Data.Consultation;[m
+ [m
+ public sealed class Material : NamedEntity[m
+ {[m
+[31m-    public string Name { get; set; } = "";[m
+     [Random(3, 5, "0123456789")] public string Number { get; set; } = "";[m
+ [m
+     [Random(10, 30)] public string Author { get; set; } = "";[m
+ [m
+[31m-    [Random(20, 50)] public string Details { get; set; } = "";[m
+[31m-[m
+[31m-    public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];[m
+[32m+[m[32m    // Excluded from Blazor form binding to break the Material<->CourseMaterial<->Course[m
+[32m+[m[32m    // reference cycle (see Course.CourseMaterials). EF/JSON serialization unaffected.[m
+[32m+[m[32m    [IgnoreDataMember] public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];[m
+ [m
+     [Timestamp] public byte[] Timestamp { get; set; } = [];[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/Code/Infra/EfBaseRepo.cs b/Code/Infra/EfBaseRepo.cs[m
+[1mindex bdda193..a1b855b 100644[m
+[1m--- a/Code/Infra/EfBaseRepo.cs[m
+[1m+++ b/Code/Infra/EfBaseRepo.cs[m
+[36m@@ -7,8 +7,7 @@[m [mnamespace Abc.Infra;[m
+ [m
+ public class EfBaseRepo<TContext, TEntity>(TContext c) : IRepo<TEntity>[m
+     where TContext : DbContext[m
+[31m-    where TEntity : BaseEntity[m
+[31m-{[m
+[32m+[m[32m    where TEntity : BaseEntity {[m
+     protected readonly TContext db = c;[m
+     protected virtual IQueryable<TEntity> Query() => db.Set<TEntity>();[m
+     public async Task<int> CountAsync(Query q)[m
+[36m@@ -16,8 +15,7 @@[m [mpublic class EfBaseRepo<TContext, TEntity>(TContext c) : IRepo<TEntity>[m
+         var r = addS

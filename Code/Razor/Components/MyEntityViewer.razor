@@ -1,7 +1,15 @@
-﻿
+﻿@using Abc.Shared.Code
+
 @foreach (var p in Entity?.GetType().GetProperties()??[])
 {
-    <MyPropertyViewer Label="@p.Name"Value="@p.GetValue(Entity)?.ToString()"/>
+    @* Use the same predicate as the index grid so the Details page only lists
+       meaningful fields - it skips the raw Id, navigation objects/collections and
+       the byte[] concurrency Timestamp instead of dumping their type names. *@
+    @if (!MyGridAids.Show(p)) continue;
+    @* MyGridAids.Value (the same resolver the index grid uses) turns a [Select] foreign
+       key into its navigation's display name - e.g. LecturerId -> the lecturer's Name -
+       instead of printing the raw Guid, and formats dates the same way as the grid. *@
+    <MyPropertyViewer Label="@p.Name"Value="@MyGridAids.Value(p, Entity)"/>
 }
 
 @code {

@@ -15,7 +15,7 @@
 
 @code {
     [SupplyParameterFromQuery] private Guid Id { get; set; }
-    [SupplyParameterFromForm] private CourseMaterial courseMaterial { get; set; }
+    [SupplyParameterFromForm(Name = nameof(CourseMaterial))] private CourseMaterial courseMaterial { get; set; }
     protected override async Task OnInitializedAsync()
     {
         courseMaterial ??= await repo.GetAsync(Id);

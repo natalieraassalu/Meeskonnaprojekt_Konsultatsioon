@@ -6,11 +6,22 @@
 @inject IConsultationSlotsRepo repo
 @inject NavigationManager NavigationManager
 
-<MyCreatePage Entity="consultationSlot" EntityTitle="Consultation Slot" BasePath="/consultationslots" OnValidSubmit="addConsultationSlot" />
+<MyCreatePage Entity="consultationSlot" EntityTitle="Consultation Slot" BasePath="/consultationslots" OnValidSubmit="addConsultationSlot"
+              Exclude="@(new[] { nameof(ConsultationSlot.IsBooked) })" />
 
 @code {
-    [SupplyParameterFromForm] private ConsultationSlot consultationSlot { get; set; } = default!;
-    protected override void OnInitialized() => consultationSlot ??= new();
+    [SupplyParameterFromForm(Name = nameof(ConsultationSlot))] private ConsultationSlot consultationSlot { get; set; } = default!;
+    protected override void OnInitialized()
+    {
+        // Default to the current date/time rounded down to the whole minute (no seconds).
+        var now = DateTime.Now;
+        now = now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMinute));
+        consultationSlot ??= new()
+        {
+            StartTime = now,
+            EndTime = now.AddHours(1)
+        };
+    }
     private async Task addConsultationSlot()
     {
         await repo.CreateAsync(consultationSlot);

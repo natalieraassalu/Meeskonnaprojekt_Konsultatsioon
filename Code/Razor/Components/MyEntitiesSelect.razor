@@ -17,7 +17,12 @@
 </InputSelect>
 
 @code {
-    [Inject] private ApplicationDbContext db { get; set; } = default!;
+    // Use the context factory (not the scoped ApplicationDbContext) so loading the
+    // dropdown options runs on its own short-lived context. The scoped context is shared
+    // with Identity/the EF repos, and querying it here during a render overlaps with those
+    // operations -> "A second operation was started on this context instance". This matches
+    // the factory pattern used by the app's other DB-querying pages (e.g. MyBookings, MySlots).
+    [Inject] private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; } = default!;
 
     [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object> Attributes { get; set; }
     [Parameter] public Guid? Value { get; set; }
@@ -42,6 +47,7 @@
     }
     private async Task<IReadOnlyList<OptionItem>> loadOptionsGeneric<TEntity>() where TEntity : BaseEntity
     {
+        using var db = DbFactory.CreateDbContext();
         var entities = await db.Set<TEntity>().AsNoTracking().ToListAsync();
         return entities
             .Select(e => new OptionItem(e.Id, displayText(e)))

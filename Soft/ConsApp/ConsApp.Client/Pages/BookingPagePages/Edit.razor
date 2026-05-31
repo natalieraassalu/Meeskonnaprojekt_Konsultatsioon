@@ -15,7 +15,7 @@
 
 @code {
     [SupplyParameterFromQuery] private Guid Id { get; set; }
-    [SupplyParameterFromForm] private BookingPage bookingPage { get; set; }
+    [SupplyParameterFromForm(Name = nameof(BookingPage))] private BookingPage bookingPage { get; set; }
     protected override async Task OnInitializedAsync()
     {
         bookingPage ??= await repo.GetAsync(Id);

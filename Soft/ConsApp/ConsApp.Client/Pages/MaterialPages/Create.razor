@@ -9,7 +9,7 @@
 <MyCreatePage Entity="material" EntityTitle="Material" BasePath="/materials" OnValidSubmit="addMaterial" />
 
 @code {
-    [SupplyParameterFromForm] private Material material { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(Material))] private Material material { get; set; } = default!;
     protected override void OnInitialized() => material ??= new();
     private async Task addMaterial()
     {

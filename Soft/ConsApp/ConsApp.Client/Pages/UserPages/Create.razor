@@ -9,7 +9,7 @@
 <MyCreatePage Entity="user" EntityTitle="User" BasePath="/users" OnValidSubmit="addUser" />
 
 @code {
-    [SupplyParameterFromForm] private User user { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(User))] private User user { get; set; } = default!;
     protected override void OnInitialized() => user ??= new();
     private async Task addUser()
     {

@@ -9,7 +9,7 @@
 <MyCreatePage Entity="courseConsultation" EntityTitle="Course Consultation" BasePath="/courseconsultations" OnValidSubmit="addCourseConsultation" />
 
 @code {
-    [SupplyParameterFromForm] private CourseConsultation courseConsultation { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(CourseConsultation))] private CourseConsultation courseConsultation { get; set; } = default!;
     protected override void OnInitialized() => courseConsultation ??= new();
     private async Task addCourseConsultation()
     {

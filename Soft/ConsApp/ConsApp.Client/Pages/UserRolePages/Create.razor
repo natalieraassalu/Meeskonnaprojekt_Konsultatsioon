@@ -9,7 +9,7 @@
 <MyCreatePage Entity="userRole" EntityTitle="User Role" BasePath="/userroles" OnValidSubmit="addUserRole" />
 
 @code {
-    [SupplyParameterFromForm] private UserRole userRole { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(UserRole))] private UserRole userRole { get; set; } = default!;
     protected override void OnInitialized() => userRole ??= new();
     private async Task addUserRole()
     {

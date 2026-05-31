@@ -9,7 +9,7 @@
 <MyCreatePage Entity="feedback" EntityTitle="Feedback" BasePath="/feedbacks" OnValidSubmit="addFeedback" />
 
 @code {
-    [SupplyParameterFromForm] private Feedback feedback { get; set; } = default!;
+    [SupplyParameterFromForm(Name = nameof(Feedback))] private Feedback feedback { get; set; } = default!;
     protected override void OnInitialized() => feedback ??= new();
     private async Task addFeedback()
     {

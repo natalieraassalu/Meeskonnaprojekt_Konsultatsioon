@@ -1,22 +1,17 @@
 ﻿using Abc.Aids;
 using Abc.Data.Common;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace Abc.Data.Consultation;
 
 public sealed class Course : NamedEntity
 {
-    [Random(6, 8, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")]
-    public string Code { get; set; } = "";
-
-    [Random(20, 100)]
-    public string Details { get; set; } = "";
-
-    public DateTime StartOfCourse { get; set; }
-
-    public DateTime EndOfCourse { get; set; }
-
-    public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
+    // Navigation collection: excluded from Blazor form binding ([IgnoreDataMember])
+    // to break the Course<->CourseMaterial<->Material reference cycle, which would
+    // otherwise exceed the form mapper's max recursion depth. EF mapping and the
+    // System.Text.Json API (which honors [JsonIgnore], not this) are unaffected.
+    [IgnoreDataMember] public ICollection<CourseMaterial> CourseMaterials { get; set; } = [];
 
     [Timestamp] public byte[] Timestamp { get; set; } = [];
 }

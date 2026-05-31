@@ -32,9 +32,18 @@ public class EfBaseRepo<TContext, TEntity>(TContext c) : IRepo<TEntity>
     private async Task deleteAsync(Guid id) {
         var entity = await GetAsync(id);
         if (entity is null) return;
+        await DeleteDependents(entity);
         db.Remove(entity);
         await db.SaveChangesAsync();
     }
+    // Hook for repos to remove dependent rows before the entity itself is deleted.
+    // Consultation FKs use DeleteBehavior.NoAction (the DB does not cascade), so a
+    // parent that still has children must clear them here, otherwise SaveChanges fails
+    // with a REFERENCE constraint conflict. Default is a no-op: entities whose FKs
+    // cascade at the database level (e.g. Movie) need nothing here. Children are marked
+    // for deletion on the same context, so the SaveChangesAsync below persists the
+    // child and parent deletes together in one transaction.
+    protected virtual Task DeleteDependents(TEntity entity) => Task.CompletedTask;
     private async Task<IEnumerable<TEntity>> getAsync(Query q) {
         var r = addSearch(Query(), q);
         r = addSort(r, q);

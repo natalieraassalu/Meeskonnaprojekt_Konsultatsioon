@@ -23,6 +23,8 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>Course</th>
+                <th>Lecturer</th>
                 <th>Slot</th>
                 <th>Booking Date</th>
                 <th>Note</th>
@@ -33,7 +35,12 @@ else
             @foreach (var booking in bookings)
             {
                 var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
+                var lecturerName = slot != null ? users.FirstOrDefault(u => u.Id == slot.LecturerId)?.Name : null;
+                var cc = slot != null ? courseConsultations.FirstOrDefault(x => x.ConsultationSlotId == slot.Id) : null;
+                var courseName = cc != null ? courses.FirstOrDefault(c => c.Id == cc.CourseId)?.Name : null;
                 <tr>
+                    <td>@(courseName ?? "Unknown")</td>
+                    <td>@(lecturerName ?? "Unknown")</td>
                     <td>@(slot != null ? $"{slot.StartTime:g} - {slot.EndTime:g}" : "Unknown")</td>
                     <td>@booking.BookingDate.ToString("g")</td>
                     <td>@booking.Note</td>
@@ -53,6 +60,9 @@ else
 @code {
     private List<BookingPage> bookings = new();
     private List<ConsultationSlot> slots = new();
+    private List<User> users = new();
+    private List<CourseConsultation> courseConsultations = new();
+    private List<Course> courses = new();
 
     // The logged-in student's User.Id, used to filter bookings.
     private Guid currentStudentId = Guid.Empty;
@@ -83,6 +93,11 @@ else
 
         // Load slots so we can show the time range for each booking.
         slots = await context.ConsultationSlot.ToListAsync();
+
+        // Supporting data to resolve each booking's lecturer name and course name.
+        users = await context.User.ToListAsync();
+        courseConsultations = await context.CourseConsultation.ToListAsync();
+        courses = await context.Courses.ToListAsync();
     }
 
     private async Task CancelBooking(Guid bookingId)

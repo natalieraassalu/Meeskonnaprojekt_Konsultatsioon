@@ -33,6 +33,13 @@ public class CoursesRepo(ApplicationDbContext c = null)
     protected override IQueryable<Course> Query() => db.Courses
         .Include(x => x.CourseMaterials)
         .ThenInclude(x => x.Material);
+    protected override async Task DeleteDependents(Course e)
+    {
+        db.CourseMaterials.RemoveRange(await db.CourseMaterials.Where(x => x.CourseId == e.Id).ToListAsync());
+        db.CourseSelector.RemoveRange(await db.CourseSelector.Where(x => x.CourseId == e.Id).ToListAsync());
+        db.CoursePost.RemoveRange(await db.CoursePost.Where(x => x.CourseId == e.Id).ToListAsync());
+        db.CourseConsultation.RemoveRange(await db.CourseConsultation.Where(x => x.CourseId == e.Id).ToListAsync());
+    }
 }
 public class MaterialsRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, Material>(c), IMaterialsRepo
@@ -40,6 +47,10 @@ public class MaterialsRepo(ApplicationDbContext c = null)
     protected override IQueryable<Material> Query() => db.Materials
         .Include(x => x.CourseMaterials)
         .ThenInclude(x => x.Course);
+    protected override async Task DeleteDependents(Material e)
+    {
+        db.CourseMaterials.RemoveRange(await db.CourseMaterials.Where(x => x.MaterialId == e.Id).ToListAsync());
+    }
 }
 public class CourseMaterialsRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, CourseMaterial>(c), ICourseMaterialsRepo
@@ -81,6 +92,12 @@ public class ConsultationSlotsRepo(ApplicationDbContext c = null)
 {
     protected override IQueryable<ConsultationSlot> Query() => db.ConsultationSlot
         .Include(x => x.Lecturer);
+    protected override async Task DeleteDependents(ConsultationSlot e)
+    {
+        db.BookingPage.RemoveRange(await db.BookingPage.Where(x => x.SlotId == e.Id).ToListAsync());
+        db.Notification.RemoveRange(await db.Notification.Where(x => x.ConsultationSlotId == e.Id).ToListAsync());
+        db.CourseConsultation.RemoveRange(await db.CourseConsultation.Where(x => x.ConsultationSlotId == e.Id).ToListAsync());
+    }
 }
 
 public class CourseConsultationsRepo(ApplicationDbContext c = null)

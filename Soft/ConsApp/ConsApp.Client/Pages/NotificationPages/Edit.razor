@@ -15,7 +15,7 @@
 
 @code {
     [SupplyParameterFromQuery] private Guid Id { get; set; }
-    [SupplyParameterFromForm] private Notification notification { get; set; }
+    [SupplyParameterFromForm(Name = nameof(Notification))] private Notification notification { get; set; }
     protected override async Task OnInitializedAsync()
     {
         notification ??= await repo.GetAsync(Id);
