@@ -36,8 +36,12 @@ else
             {
                 var slot = slots.FirstOrDefault(s => s.Id == booking.SlotId);
                 var lecturerName = slot != null ? users.FirstOrDefault(u => u.Id == slot.LecturerId)?.Name : null;
-                var cc = slot != null ? courseConsultations.FirstOrDefault(x => x.ConsultationSlotId == slot.Id) : null;
-                var courseName = cc != null ? courses.FirstOrDefault(c => c.Id == cc.CourseId)?.Name : null;
+                var courseId = booking.CourseId;
+                if (courseId is null && slot != null)
+                {
+                    courseId = courseConsultations.FirstOrDefault(x => x.ConsultationSlotId == slot.Id)?.CourseId;
+                }
+                var courseName = courseId != null ? courses.FirstOrDefault(c => c.Id == courseId)?.Name : null;
                 <tr>
                     <td>@(courseName ?? "Unknown")</td>
                     <td>@(lecturerName ?? "Unknown")</td>
