@@ -88,7 +88,16 @@ else
                 <label class="form-label">Meeting Link:</label>
                 <input type="text" class="form-control" @bind="newMeetingLink" />
             </div>
-            @* The lecturer is the logged-in user, so no dropdown is shown. *@
+            <div class="mb-3">
+                <label class="form-label">Also add to another course:</label>
+                <InputSelect class="form-control" @bind-Value="selectedOtherCourseId">
+                    <option value="@Guid.Empty">-- only this course --</option>
+                    @foreach (var otherCourse in otherCourses)
+                    {
+                        <option value="@otherCourse.Id">@otherCourse.Name</option>
+                    }
+                </InputSelect>
+            </div>
             <button class="btn btn-success" @onclick="AddSlot">Add Slot</button>
         </div>
     </div>
@@ -105,11 +114,13 @@ else
 
     private Course? course;
     private List<ConsultationSlot> slots = new();
+    private List<Course> otherCourses = new();
 
     // Fields for the add slot form
     private DateTime newStartTime = DateTime.Now;
     private DateTime newEndTime = DateTime.Now.AddHours(1);
     private string newMeetingLink = string.Empty;
+    private Guid selectedOtherCourseId = Guid.Empty;
 
     // The logged-in user's domain User.Id - used as the LecturerId on new slots.
     private Guid loggedInUserId = Guid.Empty;
@@ -156,6 +167,28 @@ else
                 loggedInUserId = user.Id;
             }
         }
+
+        await LoadOtherCourses(context);
+    }
+
+    private async Task LoadOtherCourses(Abc.Infra.ApplicationDbContext context)
+    {
+        if (loggedInUserId == Guid.Empty)
+        {
+            otherCourses.Clear();
+            return;
+        }
+
+        // Use the same course list logic as My Courses, but leave out the current course.
+        var courseIds = await context.CourseSelector
+            .Where(courseSelector => courseSelector.StudentId == loggedInUserId)
+            .Select(courseSelector => courseSelector.CourseId)
+            .ToListAsync();
+
+        otherCourses = await context.Courses
+            .Where(otherCourse => courseIds.Contains(otherCourse.Id) && otherCourse.Id != CourseId)
+            .OrderBy(otherCourse => otherCourse.Name)
+            .ToListAsync();
     }
 
     // Runs when lecturer clicks "Add Slot"
@@ -189,12 +222,23 @@ else
             CourseId = CourseId,
             ConsultationSlotId = slot.Id
         });
+
+        if (selectedOtherCourseId != Guid.Empty)
+        {
+            context.CourseConsultation.Add(new CourseConsultation
+            {
+                CourseId = selectedOtherCourseId,
+                ConsultationSlotId = slot.Id
+            });
+        }
+
         await context.SaveChangesAsync();
 
         // Reset the form
         newStartTime = DateTime.Now;
         newEndTime = DateTime.Now.AddHours(1);
         newMeetingLink = string.Empty;
+        selectedOtherCourseId = Guid.Empty;
 
         successMessage = "Slot added successfully!";
 
