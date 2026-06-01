@@ -1,17 +1,209 @@
-﻿@page "/courses"
+@page "/courses"
 @using Abc.Data.Consultation
 @using Abc.Infra
+@using Abc.Razor.Code
+@using Abc.Shared.Code
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Reflection
 @attribute [ExcludeFromInteractiveRouting]
+@implements IDisposable
 @inject ICoursesRepo repo
 @inject NavigationManager NavigationManager
 
-<MyIndexPage TItem="Course"
-             PageTitleText="Course Page"
-             EntityTitle="Courses"
-             Repo="repo"
-             BasePath="courses"
-             ShowCreate="false">
-</MyIndexPage>
+<PageTitle>Course Page</PageTitle>
+
+<h1>Courses</h1>
+
+<p>
+    <a class="btn btn-secondary btn-sm" href="@clearFiltersHref">Clear filters</a>
+</p>
+
+<QuickGrid Class="table myTable" Items="@Courses">
+    <TemplateColumn>
+        <HeaderTemplate>
+            <MyTableHeader Query="@query" BasePath="@basePath" PropertyInfo="@NameProperty" />
+        </HeaderTemplate>
+        <ChildContent Context="course">
+            @course.Name
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn>
+        <HeaderTemplate>
+            <MyTableHeader Query="@query" BasePath="@basePath" PropertyInfo="@CodeProperty" />
+        </HeaderTemplate>
+        <ChildContent Context="course">
+            @course.Code
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn>
+        <HeaderTemplate>
+            <MyTableHeader Query="@query" BasePath="@basePath" PropertyInfo="@DetailsProperty" />
+        </HeaderTemplate>
+        <ChildContent Context="course">
+            @course.Details
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn>
+        <HeaderTemplate>
+            <MyTableHeader Query="@query" BasePath="@basePath" PropertyInfo="@ValidFromProperty" />
+        </HeaderTemplate>
+        <ChildContent Context="course">
+            @dateText(course.ValidFrom)
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn>
+        <HeaderTemplate>
+            <MyTableHeader Query="@query" BasePath="@basePath" PropertyInfo="@ValidToProperty" />
+        </HeaderTemplate>
+        <ChildContent Context="course">
+            @dateText(course.ValidTo)
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn>
+        <HeaderTemplate>Status</HeaderTemplate>
+        <ChildContent Context="course">
+            <span class="@statusClass(course)">@courseStatus(course)</span>
+        </ChildContent>
+    </TemplateColumn>
+    <TemplateColumn Context="course">
+        <MyTableRowButtons TEntity="Course" Item="@course" BasePath="@basePath" Query="@query" />
+    </TemplateColumn>
+</QuickGrid>
+
+@if (isSelected(selectedCourse)) {
+    foreach (var c in new RelatedLists(selectedCourse)) {
+        var items = c.Items;
+        var cols = c.Properties;
+        <div class="panel">
+            <div class="header">
+                <span>@c.Name (@c.Count)</span>
+                <a href="@closeHref(selectedCourse)" aria-label="Close" class="close">&times;</a>
+            </div>
+            <QuickGrid Class="table myTable" Items="items">
+                @foreach (var p in cols) {
+                    @if (!MyGridAids.Show(p)) continue;
+                    <TemplateColumn>
+                        <HeaderTemplate>@p.Name</HeaderTemplate>
+                        <ChildContent Context="item">
+                            @(MyGridAids.Value(p, item))
+                        </ChildContent>
+                    </TemplateColumn>
+                }
+            </QuickGrid>
+        </div>
+    }
+}
+
+<MyTablePageNav Query="@query" TotalCount="@totalCount" CurrentUri="@NavigationManager.Uri" />
 
 @code {
+    private const string basePath = "courses";
+    private static readonly PropertyInfo NameProperty = typeof(Course).GetProperty(nameof(Course.Name));
+    private static readonly PropertyInfo CodeProperty = typeof(Course).GetProperty(nameof(Course.Code));
+    private static readonly PropertyInfo DetailsProperty = typeof(Course).GetProperty(nameof(Course.Details));
+    private static readonly PropertyInfo ValidFromProperty = typeof(Course).GetProperty(nameof(Course.ValidFrom));
+    private static readonly PropertyInfo ValidToProperty = typeof(Course).GetProperty(nameof(Course.ValidTo));
+
+    private IQueryable<Course> Courses { get; set; } = Enumerable.Empty<Course>().AsQueryable();
+    private int totalCount;
+    private Query query = new();
+    private Course selectedCourse;
+
+    private string clearFiltersHref
+    {
+        get
+        {
+            var href = $"{basePath}?Page=1&PageSize={query.PageSize}";
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+                href += $"&SortBy={query.SortBy}&SortDir={query.SortDir}";
+            return href;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavigationManager.LocationChanged += onLocationChanged;
+        await loadAsync();
+    }
+
+    private async Task loadAsync()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        query = new UrlParams(uri).Parse();
+        totalCount = await repo.CountAsync(query);
+        Courses = (await repo.GetAsync(query)).AsQueryable();
+        selectedCourse = Courses.FirstOrDefault(x => x.Id.ToString() == query.Selected);
+    }
+
+    private void onLocationChanged(object sender, LocationChangedEventArgs e)
+        => _ = InvokeAsync(async () =>
+        {
+            await loadAsync();
+            StateHasChanged();
+        });
+
+    private static string dateText(DateTime? date)
+        => date.HasValue ? date.Value.ToString("g") : string.Empty;
+
+    private static string courseStatus(Course course)
+    {
+        var today = DateTime.Today;
+
+        if (course.ValidFrom.HasValue && course.ValidFrom.Value.Date > today)
+            return "Upcoming";
+
+        if (course.ValidTo.HasValue && course.ValidTo.Value.Date < today)
+            return "Expired";
+
+        return "Active";
+    }
+
+    private static string statusClass(Course course)
+    {
+        var status = courseStatus(course);
+        return status == "Upcoming" ? "badge text-bg-info"
+            : status == "Expired" ? "badge text-bg-secondary"
+            : "badge text-bg-success";
+    }
+
+    private bool isSelected(Course course) => query.Selected == course?.Id.ToString();
+    private string closeHref(Course course) => query.Href(basePath, course.Id);
+    public void Dispose() => NavigationManager.LocationChanged -= onLocationChanged;
 }
+
+<style>
+    .myTable {
+        table-layout: fixed;
+        width: 100%;
+        max-width: 100%;
+    }
+
+        .myTable td {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+    .panel {
+        margin: .5rem 0;
+        padding: .75rem;
+        background: #fafafa;
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .5rem;
+        font-weight: 600;
+    }
+
+    .close {
+        text-decoration: none;
+        color: inherit;
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+</style>

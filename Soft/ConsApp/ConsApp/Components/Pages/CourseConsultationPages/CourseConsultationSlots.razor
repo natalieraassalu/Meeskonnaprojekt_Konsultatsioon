@@ -101,6 +101,7 @@ else {
         slot.IsBooked = true;
 
         context.BookingPage.Add(new BookingPage{
+            CourseId = Id,
             SlotId = slotId,
             StudentId = student.Id,
             BookingDate = DateTime.Now,
