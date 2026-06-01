@@ -22,7 +22,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CourseSelector> CourseSelector { get; set; } = default!;
     public DbSet<CourseConsultation> CourseConsultation { get; set; } = default!;
     public DbSet<Feedback> Feedback { get; set; } = default!;
-    public DbSet<Notification> Notification { get; set; } = default!;
     public DbSet<CoursePost> CoursePost { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder b) {

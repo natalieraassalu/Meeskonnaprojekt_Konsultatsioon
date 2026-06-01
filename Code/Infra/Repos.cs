@@ -95,7 +95,6 @@ public class ConsultationSlotsRepo(ApplicationDbContext c = null)
     protected override async Task DeleteDependents(ConsultationSlot e)
     {
         db.BookingPage.RemoveRange(await db.BookingPage.Where(x => x.SlotId == e.Id).ToListAsync());
-        db.Notification.RemoveRange(await db.Notification.Where(x => x.ConsultationSlotId == e.Id).ToListAsync());
         db.CourseConsultation.RemoveRange(await db.CourseConsultation.Where(x => x.ConsultationSlotId == e.Id).ToListAsync());
     }
 }
@@ -117,14 +116,6 @@ public class FeedbacksRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, Feedback>(c), IFeedbacksRepo
 { }
 
-public class NotificationsRepo(ApplicationDbContext c = null)
-    : EfBaseRepo<ApplicationDbContext, Notification>(c), INotificationsRepo
-{
-    protected override IQueryable<Notification> Query() => db.Notification
-        .Include(x => x.ConsultationSlot)
-        .Include(x => x.Lecturer)
-        .Include(x => x.Student);
-}
 
 public class CoursePostsRepo(ApplicationDbContext c = null)
     : EfBaseRepo<ApplicationDbContext, CoursePost>(c), ICoursePostsRepo

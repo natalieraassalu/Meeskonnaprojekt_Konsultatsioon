@@ -14,7 +14,7 @@
   <Class Name="Abc.Data.Consultation.ConsultationSlot">
     <Position X="8.75" Y="7" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAACAAAAAAAIAAAAAAgCAAIAAgAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAACAAAAAAAIAAAAAAgCAAIAAgACAAACAAAAAAAAA=</HashCode>
       <FileName>Consultation\ConsultationSlot.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -27,18 +27,6 @@
       <HashCode>AAAAAAAAACAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Consultation\User.cs</FileName>
     </TypeIdentifier>
-  </Class>
-  <Class Name="Abc.Data.Consultation.Notification">
-    <Position X="4" Y="6.75" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAACAEQAABAAAAACAAgAAAAACAAAAAAAAAIAACAAA=</HashCode>
-      <FileName>Consultation\Notification.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="ConsultationSlot" />
-      <Property Name="Lecturer" />
-      <Property Name="Student" />
-    </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.CourseSelector">
     <Position X="3.25" Y="4.25" Width="1.5" />
@@ -58,7 +46,7 @@
   <Class Name="Abc.Data.Consultation.Course">
     <Position X="6.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAABAAAAAAAiAAAAAAAAACAAICAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
       <FileName>Consultation\Course.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -90,8 +78,15 @@
   <Class Name="Abc.Data.Consultation.Material">
     <Position X="11.75" Y="4.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAABAAAAgEACAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAgEACAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
       <FileName>Consultation\Material.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Abc.Data.Consultation.CourseConsultation" Collapsed="true">
+    <Position X="13.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Consultation\CourseConsultation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

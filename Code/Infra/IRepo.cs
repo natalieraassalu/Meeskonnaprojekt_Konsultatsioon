@@ -30,5 +30,4 @@ public interface IConsultationSlotsRepo : IRepo<ConsultationSlot> { }
 public interface ICourseConsultationsRepo : IRepo<CourseConsultation> { }
 public interface ICourseSelectorsRepo : IRepo<CourseSelector> { }
 public interface IFeedbacksRepo : IRepo<Feedback> { }
-public interface INotificationsRepo : IRepo<Notification> { }
 public interface ICoursePostsRepo : IRepo<CoursePost> { }

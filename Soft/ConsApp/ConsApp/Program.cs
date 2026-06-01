@@ -65,8 +65,7 @@ builder.Services.AddScoped<IBookingPagesRepo, BookingPagesRepo>();
 builder.Services.AddScoped<IConsultationSlotsRepo, ConsultationSlotsRepo>();
 builder.Services.AddScoped<ICourseConsultationsRepo, CourseConsultationsRepo>();
 builder.Services.AddScoped<ICourseSelectorsRepo, CourseSelectorsRepo>();
-builder.Services.AddScoped<IFeedbacksRepo, FeedbacksRepo>();
-builder.Services.AddScoped<INotificationsRepo, NotificationsRepo>();
+builder.Services.AddScoped<IFeedbacksRepo, FeedbacksRepo>();    
 builder.Services.AddScoped<ICoursePostsRepo, CoursePostsRepo>();
 
 var app = builder.Build();
@@ -121,7 +120,6 @@ app.MapConsultationSlotsApi();
 app.MapBookingPagesApi();
 app.MapCourseConsultationsApi();
 app.MapFeedbacksApi();
-app.MapNotificationsApi();
 app.MapRolesApi();
 app.MapUsersApi();
 app.MapUserRolesApi();
