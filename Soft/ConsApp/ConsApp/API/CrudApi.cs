@@ -3,7 +3,7 @@ using Abc.Infra;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Abc.Soft.ConsApp;
+namespace Abc.Soft.ConsApp.API;
 
 public static class CrudApi
 {

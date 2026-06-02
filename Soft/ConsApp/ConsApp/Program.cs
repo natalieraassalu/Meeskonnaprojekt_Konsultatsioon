@@ -1,5 +1,5 @@
 using Abc.Infra;
-using Abc.Soft.ConsApp;
+using Abc.Soft.ConsApp.API;
 using Abc.Soft.ConsApp.Components;
 using Abc.Soft.ConsApp.Components.Account;
 using Microsoft.AspNetCore.Components.Authorization;
