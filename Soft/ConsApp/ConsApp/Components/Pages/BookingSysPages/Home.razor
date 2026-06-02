@@ -27,13 +27,6 @@ else
             <label class="form-label">Search</label>
             <input class="form-control" placeholder="Search by name or code" @bind="searchText" @bind:event="oninput" />
         </div>
-        <div class="col-md-3">
-            <label class="form-label">Sort by</label>
-            <select class="form-control" @bind="sortBy">
-                <option value="Name">Name</option>
-                <option value="Code">Code</option>
-            </select>
-        </div>
     </div>
 
     var coursesToShow = GetCoursesToShow();
@@ -66,7 +59,6 @@ else
 @code {
     private List<Course> courses = new();
     private string searchText = "";
-    private string sortBy = "Name";
 
     // True when the logged-in student has no CourseSelector rows.
     private bool notEnrolled = false;
@@ -127,11 +119,6 @@ else
             result = result.Where(course =>
                 course.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                 course.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-
-        if (sortBy == "Code")
-        {
-            return result.OrderBy(course => course.Code).ToList();
         }
 
         return result.OrderBy(course => course.Name).ToList();
