@@ -98,7 +98,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.Feedback">
-    <Position X="12" Y="8.5" Width="1.5" />
+    <Position X="12" Y="8.75" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAEAAAIAAAAACAAAAAAAAAAAAEAAAAAAAAAAAA=</HashCode>
       <FileName>Consultation\feedback.cs</FileName>
