@@ -21,23 +21,41 @@
     <p>No available courses.</p>
 }
 else {
-    <div class="mb-3">
-        <label for="courseid" class="form-label">Course:</label>
-        <InputSelect id="courseid" @bind-Value="selectedCourseId" class="form-control">
-            <option value="@Guid.Empty">-- select course --</option>
-            @foreach (var course in courses) {
-                <option value="@course.Id">@course.Name</option>
-            }
-        </InputSelect>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Search</label>
+            <input class="form-control" placeholder="Search by name or code" @bind="searchText" @bind:event="oninput" />
+        </div>
     </div>
 
-    <button type="button" class="btn btn-primary" @onclick="AddToMyCourses">Add to My Courses</button>
+    var coursesToShow = GetCoursesToShow();
+
+    @if (coursesToShow.Count == 0) {
+        <p>No matching courses found.</p>
+    }
+    else {
+        <div class="row">
+            @foreach (var course in coursesToShow) {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@course.Name (@course.Code)</h5>
+                            <p class="card-text">@course.Details</p>
+                            <button type="button" class="btn btn-primary mt-auto" @onclick="() => AddToMyCourses(course.Id)">
+                                Add to My Courses
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 }
 
 @code {
     private Guid currentUserId;
     private List<Course> courses = new();
-    private Guid selectedCourseId = Guid.Empty;
+    private string searchText = "";
     private string message = string.Empty;
 
     protected override async Task OnInitializedAsync() {
@@ -51,39 +69,47 @@ else {
             .Select(user => user.Id)
             .FirstAsync();
 
-        await LoadCourses(context);
+        await LoadCourses();
     }
 
-    private async Task LoadCourses(Abc.Infra.ApplicationDbContext context) {
+    private async Task LoadCourses() {
+        using var context = DbFactory.CreateDbContext();
+
         var selectedCourseIds = await context.CourseSelector
             .Where(cs => cs.StudentId == currentUserId)
             .Select(cs => cs.CourseId)
             .ToListAsync();
 
         courses = await context.Courses
-            .Where(c => !selectedCourseIds.Contains(c.Id))
-            .OrderBy(c => c.Name)
+            .Where(course => !selectedCourseIds.Contains(course.Id))
+            .OrderBy(course => course.Name)
             .ToListAsync();
     }
 
-    private async Task AddToMyCourses() {
-        if (selectedCourseId == Guid.Empty) {
-            message = "Please choose a course.";
-            return;
-        }
-
+    private async Task AddToMyCourses(Guid courseId) {
         using var context = DbFactory.CreateDbContext();
 
         context.CourseSelector.Add(new CourseSelectorEntity {
-            CourseId = selectedCourseId,
+            CourseId = courseId,
             StudentId = currentUserId,
             LecturerId = currentUserId
         });
 
         await context.SaveChangesAsync();
 
-        selectedCourseId = Guid.Empty;
         message = "Course added to My Courses.";
-        await LoadCourses(context);
+        await LoadCourses();
+    }
+
+    private List<Course> GetCoursesToShow() {
+        var result = courses;
+
+        if (!string.IsNullOrWhiteSpace(searchText)) {
+            result = result.Where(course =>
+                course.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                course.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        return result.OrderBy(course => course.Name).ToList();
     }
 }
