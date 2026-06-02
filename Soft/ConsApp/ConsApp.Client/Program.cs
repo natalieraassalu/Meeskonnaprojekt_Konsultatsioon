@@ -15,6 +15,7 @@ builder.Services.AddScoped<ICourseMaterialsRepo, CourseMaterialsHttpRepo>();
 builder.Services.AddScoped<IConsultationSlotsRepo, ConsultationSlotsHttpRepo>();
 builder.Services.AddScoped<IBookingPagesRepo, BookingPagesHttpRepo>();
 builder.Services.AddScoped<ICourseConsultationsRepo, CourseConsultationsHttpRepo>();
+builder.Services.AddScoped<ICourseSelectorsRepo, CourseSelectorsHttpRepo>();
 builder.Services.AddScoped<IFeedbacksRepo, FeedbacksHttpRepo>();
 builder.Services.AddScoped<IRolesRepo, RolesHttpRepo>();
 builder.Services.AddScoped<IUsersRepo, UsersHttpRepo>();

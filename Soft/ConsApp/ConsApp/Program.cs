@@ -119,6 +119,7 @@ app.MapCourseMaterialsApi();
 app.MapConsultationSlotsApi();
 app.MapBookingPagesApi();
 app.MapCourseConsultationsApi();
+app.MapCourseSelectorsApi();
 app.MapFeedbacksApi();
 app.MapRolesApi();
 app.MapUsersApi();
