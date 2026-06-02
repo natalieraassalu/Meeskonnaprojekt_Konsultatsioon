@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Abc.Data.Consultation.BookingPage">
-    <Position X="9.25" Y="8.5" Width="1.5" />
+    <Position X="9.5" Y="8.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEQAAEQAAAAIAAAIAAAAAAAAAAAAAAAAAAAAECAgA=</HashCode>
       <FileName>Consultation\BookingPage.cs</FileName>
@@ -12,7 +12,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.ConsultationSlot">
-    <Position X="4.5" Y="8.5" Width="2.25" />
+    <Position X="3.75" Y="8.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAACAAAAAAAIAAAAAAgCAAIAAgACAAACAAAAAAAAA=</HashCode>
       <FileName>Consultation\ConsultationSlot.cs</FileName>
@@ -87,11 +87,15 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Abc.Data.Consultation.CourseConsultation">
-    <Position X="7.25" Y="7.25" Width="1.5" />
+    <Position X="7" Y="7" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAEAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAEAAAAAAABAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Consultation\CourseConsultation.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Course" />
+      <Property Name="ConsultationSlot" />
+    </ShowAsAssociation>
   </Class>
   <Class Name="Abc.Data.Consultation.Feedback">
     <Position X="12" Y="8.5" Width="1.5" />
