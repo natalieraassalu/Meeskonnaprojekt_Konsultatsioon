@@ -1,5 +1,5 @@
 using Abc.Infra;
-using Abc.Soft.ConsApp.Client;
+using Abc.Soft.ConsApp.Client.Repod;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

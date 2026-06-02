@@ -2,7 +2,7 @@ using Abc.Data.Common;
 using Abc.Infra;
 using System.Net.Http.Json;
 
-namespace Abc.Soft.ConsApp.Client;
+namespace Abc.Soft.ConsApp.Client.Repod;
 
 public abstract class HttpRepo<TEntity>(HttpClient http, string path) : IRepo<TEntity>
     where TEntity : BaseEntity
