@@ -174,20 +174,20 @@
 @code {
     private string? currentUrl;
 
-    // The logged-in user's role name ("Student", "Lecturer", or null for admin/unknown).
+    // hangime rolli
     private string? role;
 
     protected override async Task OnInitializedAsync()
     {
-        // Track the current URL for the logout return path.
+        // jälgib su liiklust lehel, et teada kuidas sind pärast välja logida, kasutu aga identity mall osa.
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
 
-        // Look up the role once on load - decides which links to show.
+        // kui leht laeb ära, siis vaatab kohe, mis roll sa oled, et teaks mida kuvada.
         role = await GetUserRoleAsync();
     }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) //uuendab iga kord menüüd kui vahetad lehte, et logouti returnurl oleks õige
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
@@ -198,21 +198,21 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 
-    // Helper method: returns the logged-in user's role name ("Lecturer", "Student" or null).
+    // leiab kasutaja rolli
     private async Task<string?> GetUserRoleAsync()
     {
-        // Get the current authentication state to read the user's email.
+        // kontrollib kas keegi sisselogitud emaili kaudu, kui emaili pole siis ei ole.
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.Identity?.Name;
         if (string.IsNullOrEmpty(email)) return null;
 
-        using var context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext(); // ava db
 
-        // Find the matching User record by email.
+        // leiab useri emaili järgi
         var user = await context.User.FirstOrDefaultAsync(u => u.Email == email);
         if (user is null) return null;
 
-        // Look up the user's role by joining UserRole with Role.
+        // leiab ta rolli
         var userRole = await context.UserRole
             .Include(ur => ur.Role)
             .FirstOrDefaultAsync(ur => ur.UserId == user.Id);

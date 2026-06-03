@@ -6,7 +6,7 @@ using System.Net.NetworkInformation;
 
 namespace Abc.Infra;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :IdentityDbContext<ApplicationUser>(options){
-    public DbSet<Movie> Movies { get; set; } = default!;
+    public DbSet<Movie> Movies { get; set; } = default!; //tabel
     public DbSet<Country> Countries { get; set; } = default!;
     public DbSet<Currency> Currencies { get; set; } = default!;
     public DbSet<Money> Money { get; set; } = default!;
@@ -28,14 +28,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
          base.OnModelCreating(b);
          b.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-         // Consultation-specific mapping (ported from the former ConsApp.Data context),
-         // scoped to Abc.Data.Consultation entities so Movie's mapping is untouched.
-         // These three entities carry a [Timestamp] rowversion that ConsApp does not persist.
+         // ignoreerib timestamp väärtust, kuna seda pole vaja
          b.Entity<Course>().Ignore(e => e.Timestamp);
          b.Entity<Material>().Ignore(e => e.Timestamp);
          b.Entity<CourseMaterial>().Ignore(e => e.Timestamp);
 
-         // Disable cascade delete on consultation FKs to avoid multiple-cascade-path errors.
+         // deletedependents meetod kustutab ise vajalikud lahtrid
          foreach (var relationship in b.Model.GetEntityTypes()
                       .Where(e => e.ClrType.Namespace == "Abc.Data.Consultation")
                       .SelectMany(e => e.GetForeignKeys()))

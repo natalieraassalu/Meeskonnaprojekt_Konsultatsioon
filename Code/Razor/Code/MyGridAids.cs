@@ -9,8 +9,7 @@ namespace Abc.Shared.Code;
 
 public static class MyGridAids {
     // A property opts out of the auto-generated UI (editor, viewer and grid)
-    // with [ScaffoldColumn(false)] - the standard .NET scaffolding attribute.
-    // Default is to show, so entities that don't use it are unaffected.
+
     public static bool IsHidden(PropertyInfo p)
         => p?.GetCustomAttribute<ScaffoldColumnAttribute>() is { Scaffold: false };
     public static bool Show(PropertyInfo p) {
